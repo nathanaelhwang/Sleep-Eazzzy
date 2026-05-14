@@ -1,0 +1,83 @@
+{
+  "project": "Sleep Eazzzy — CBT-I patient resource website",
+  "owner": "OWND LLC",
+  "domain_target": "sleepeazzzy.org",
+  "overview": "A free, self-paced, multilingual (EN / ES / zh-Hant / zh-Hans) patient resource walking users through Cognitive Behavioral Therapy for Insomnia. Built as a single-page React app loaded via Babel-standalone from a static HTML file. Host is Wendy. Content adapted from Wendy's CBT-I video script.",
+  "primary_entry_file": "Sleep Eazzzy.html",
+  "files": {
+    "Sleep Eazzzy.html": "Entry HTML. Loads React 18.3.1 + react-dom + babel-standalone (UMD with integrity hashes), then script tags for: data.jsx, i18n.jsx, i18n-zh.jsx, shared.jsx, widgets.jsx, modules.jsx, app.jsx",
+    "data.jsx": "window.SE_DATA — base English content: MODULES list, QUIZ_QUESTIONS, REFRAME_SUGGESTIONS, PMR_STEPS, HYGIENE_DOS/DONTS, ROUTINE_LIBRARY, DEFAULT_ROUTINE",
+    "i18n.jsx": "window.SE_I18N — TRANSLATIONS (en + es), MODULES_I18N, QUIZ_I18N, REFRAME_I18N, PMR_I18N, HYGIENE_I18N, ROUTINE_LIB_I18N, DEFAULT_ROUTINE_I18N, MODULE_CONTENT, AROUSAL_I18N",
+    "i18n-zh.jsx": "Extends window.SE_I18N with zh-Hant and zh-Hans translations (Traditional + Simplified Mandarin)",
+    "shared.jsx": "Shared primitives: useStored (localStorage), LangContext + LangProvider + LangToggle, useT/useLang/useModules/useModContent hooks, useRoute (hash-based router), navigate(), Nav, BrandMark, HostCard, VideoPlayer, LessonBlock, Callout, PullQuote, ModuleHero, ModuleNav, MarkComplete, PrintBtn. Exports React hooks (useState/useEffect/useRef/useMemo) onto window.",
+    "widgets.jsx": "Interactive widgets: SleepQuiz (tap-to-reveal), ReframeJournal, BreathingTimer (4-7-8), PMRWalkthrough, CompressionCalc, RoutineBuilder, ArousalThreshold (6-stage SVG visualization with animated bar segments + threshold line + CBT press-down indicator)",
+    "modules.jsx": "Module page renderers: ModuleIntro/Cognitive/Hygiene/Relaxation/Stimulus/Compression/SleepPlan/Bonus, plus ModulePage router with ?tool=... query handling for deep-linking to tools",
+    "app.jsx": "Top-level pages: Home, ToolsPage, LibraryPage, AboutPage, ModulesIndex, Footer, NotFound, App. Hash-based router. ReactDOM root render wrapped in <LangProvider>.",
+    "styles.css": "Full stylesheet. Palette: --night #0f1e3a, --denim #1e3a5f, --denim-2 #2d4a73, --sand #c9b89a, --sand-2 #d8c8ac, --sand-3 #e8dcc4, --cream #f4f1ec, --cream-2 #ebe6dc, --ink #16243f, --muted #6b7a92. Fonts: Fraunces (serif headlines), Inter (body, system fallback).",
+    "assets/wendy.png": "Host avatar (Wendy)",
+    "assets/robert.jpg": "Robert case-card photo (EN/ES) — elderly Black/AA man headshot",
+    "assets/sarah.jpg": "Sarah case-card photo (EN/ES) — young Hispanic woman headshot",
+    "assets/robert-zh.jpg": "Robert photo for zh-Hant/zh-Hans (Chinese man)",
+    "assets/sarah-zh.jpg": "Sarah photo for zh-Hant/zh-Hans (Chinese woman)",
+    "assets/sleep-supine.png": "Sleep-position diagram, on back (Module B2)",
+    "assets/sleep-side.png": "Sleep-position diagram, on side (Module B2)"
+  },
+  "routes": {
+    "/": "Home — hero (with 'Sleep better, without the pills.'), host card, 3-stat strip (7 short modules / 2-4 wk results / progress), 7-module grid, 3 bonus cards, Robert & Sarah teaser CTA",
+    "/modules": "All-modules index with progress dots",
+    "/tools": "6 tool cards. Tool 1 Sleep Quiz (Module 1). Tool 2 Reframe (Module 2, deep-link #tool-reframe). Tool 3 Deep Breathing Relaxation (Module 4 #tool-breathing). Tool 4 Progressive Muscle Relaxation (Module 4 #tool-pmr). Tool 5 Build your Sleep Compression Therapy Schedule (Module 6 #tool-calc). Tool 6 Bedtime Routine Builder (Module 7).",
+    "/library": "Audio Library. 3 sections: white noise/nature sounds (4 long-form YouTube tracks), 10-minute relaxing music (3 tracks), guided sleep meditation (1 track — Soft Landing). Each thumbnail click swaps in an inline iframe to youtube-nocookie.com/embed. Track captions and section copy fully translated EN/ES/繁/简.",
+    "/about": "About page with disclaimer",
+    "/module/:slug": "Module page (slug ∈ intro/cognitive/hygiene/relaxation/stimulus-control/compression/sleep-plan/medications/positioning/disorders). Optional ?tool=reframe|breathing|pmr|calc query triggers scroll to anchored tool section."
+  },
+  "modules": {
+    "1 (intro)": "Welcome from Wendy (avatar = assets/wendy.png), lede prose with dropcap, train-off-tracks metaphor block, Arousal Threshold Model interactive (6 stages: Baseline → Stress hits → Habits form → Medication → Tolerance → CBT — stacked sage/amber/slate-blue bar; gradual animations on stress and CBT; CBT press-down arrow indicator), program overview grid (7 items), gentle 'Before you begin' disclaimer, SleepQuiz, Robert & Sarah case cards (with photos), 'What's next' callout",
+    "2 (cognitive)": "Cognitive therapy — perpetuating factors, thought reframing exercises, ReframeJournal widget",
+    "3 (hygiene)": "Do/Don't grid, blue-light fix instructions, 'Falling asleep is like surfing' pull quote",
+    "4 (relaxation)": "4 tools intro, BreathingTimer (4-7-8), PMRWalkthrough, guided imagery + journaling — all 3 widget areas have 'See the Library →' cross-references",
+    "5 (stimulus-control)": "5-step rule flow",
+    "6 (compression)": "Bob's example, CompressionCalc widget, 5 written steps, pair-with-stimulus-control callout",
+    "7 (sleep-plan)": "Wendy's actual routine, RoutineBuilder widget, two non-negotiables, commitment pull quote",
+    "B1 (medications)": "Educational disclaimer summary. Sections: 'Why CBT-I first' (calls back to arousal threshold tolerance + side effects), 'If you've been on sleep medications for a long time' (don't stop abruptly, taper with physician)",
+    "B2 (positioning)": "Summary emphasizes neutral spine, muscle tension, insomnia sometimes cured by sleep position alone. Includes pillow-setup-examples block with supine + side images and a caption note that special pillows aren't needed. Sections: Side sleeping, Back sleeping, Stomach sleeping (with summary that for chronic pain stomach sleeping is generally not recommended).",
+    "B3 (disorders)": "5 sections: Sleep apnea (CPAP, sleep study referral, cardiovascular + accident risk), RLS (iron, menstruating women), Circadian rhythm disorders (jet-lag analogy, DSPS in adolescents, chronotherapy, link to delayedsleep.org as a clickable hyperlink rendered via dangerouslySetInnerHTML), Narcolepsy (polysomnography + MSLT), A note on driving (do not drive sleepy, radio/AC/calls not enough — pull over, consider a short nap). Bonus modules render WITHOUT VideoPlayer (intentionally removed)."
+  },
+  "languages": {
+    "supported": ["en", "es", "zh-Hant", "zh-Hans"],
+    "toggle": "LangToggle in nav: EN / ES / 繁 / 简",
+    "storage": "useStored('lang', 'en') — localStorage key 'se_lang'",
+    "library_helper": "LibraryPage uses const L = (en, es, zh, zhs) => ({en, es, 'zh-Hant': zh, 'zh-Hans': zhs}[lang] || en);",
+    "translation_sources": "Spanish + Mandarin (both variants) were professionally translated from xlsx files (in uploads/). All UI strings, module content, widget labels, library track captions, sleep position notes, and case study text are localized."
+  },
+  "ownership_branding": {
+    "footer_copy": "© {year} OWND LLC. Educational use only.",
+    "title": "Sleep Eazzzy · A CBT-I patient program"
+  },
+  "youtube_library": {
+    "section_1_white_noise": [
+      "V303hdgB0MI — Whispering Woodland Brook",
+      "WT0pSLD63W0 — Santorini Midnight Waves",
+      "H3upsuC_FcU — Himalayan Rainfall",
+      "k6mmuOrl3eY — Fireplace Tranquility"
+    ],
+    "section_2_relaxing_10min": [
+      "iDMhd1VupaA — REM Ember Delta Waves (Ookean)",
+      "c8-lX-K0eVs — Into Cryosleep (Joseph Beg)",
+      "rQws7fTVmPI — Autumn Fields (Chaxti)"
+    ],
+    "section_3_guided_meditation": [
+      "j4ZtuyeLrTk — Soft Landing: A Sleep Meditation"
+    ],
+    "embed_strategy": "Thumbnail-as-button (uses i.ytimg.com/vi/<id>/hqdefault.jpg). On click, swaps in <iframe src='https://www.youtube-nocookie.com/embed/<id>?autoplay=1&rel=0&modestbranding=1&playsinline=1' referrerPolicy='strict-origin-when-cross-origin' allow='autoplay; encrypted-media; picture-in-picture; web-share'>. No external 'open on YouTube' link (was removed because the owner's network blocks youtube.com and youtu.be; only youtube-nocookie.com embed is accessible in their test environment)."
+  },
+  "key_design_decisions": [
+    "Multi-file React + Babel rather than single-file — easier to edit pieces without re-pasting everything",
+    "Hash-based router (#/module/intro) to avoid server config; static hosting compatible",
+    "Tool deep-links use ?tool=... query inside the hash route. ModulePage useEffect scrolls to #tool-<name> anchor wrappers after 120ms delay (waits for component mount).",
+    "localStorage persists: lang, progress (per-module completion), routine (bedtime routine), calc_wake/calc_dur (compression calc), reframe (journal entries). All prefixed with 'se_'.",
+    "Style objects always named (no const styles = {}) to avoid Babel scope collisions across script files.",
+    "Arousal Threshold widget animates threshold line during Medication/Tolerance transitions and bar segments during Stress/CBT transitions via requestAnimationFrame with cubic easing.",
+    "Module 1 welcome card uses Wendy's actual photo (assets/wendy.png). Case cards swap Robert/Sarah photos based on lang (zh variants get assets/robert-zh.jpg / sarah-zh.jpg)."
+  ],
+  "deployment_status": "User is ready to deploy to sleepeazzzy.org. Steps shared: rename Sleep Eazzzy.html → index.html, then drag-drop entire folder to Netlify Drop OR upload via existing host's file manager / FTP. DNS already needs to point at the chosen host. No build step required (Babel runs in-browser via standalone CDN script)."
+}

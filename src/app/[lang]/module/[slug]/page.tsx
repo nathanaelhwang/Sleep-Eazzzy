@@ -1,7 +1,9 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ModulePage } from '@/components/ModulePage';
 import { getDictionary, isLocale } from '@/lib/i18n/getDictionary';
+import { buildPageMetadata } from '@/lib/seo';
 
 export const dynamicParams = false;
 
@@ -16,6 +18,26 @@ export async function generateStaticParams(): Promise<{ lang: string; slug: stri
   return out;
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string; slug: string }>;
+}): Promise<Metadata> {
+  const { lang, slug } = await params;
+  if (!isLocale(lang)) return {};
+  const dict = await getDictionary(lang);
+  const mod = dict.modules.find((m) => m.slug === slug);
+  if (!mod) return {};
+  const labelKey = mod.bonus ? 'bonus_label' : 'module_label';
+  const label = (dict.t[labelKey] as string) ?? '';
+  return buildPageMetadata({
+    lang,
+    path: `/module/${slug}`,
+    title: `${label} ${mod.num}: ${mod.title}`,
+    description: mod.subtitle,
+  });
+}
+
 export default async function Page({
   params,
 }: {
@@ -26,8 +48,6 @@ export default async function Page({
   const dict = await getDictionary(lang);
   const mod = dict.modules.find((m) => m.slug === slug);
   if (!mod) notFound();
-  // Suspense boundary required because ModulePage uses useSearchParams,
-  // which must opt into client-side hydration when the rest of the page is SSG.
   return (
     <Suspense fallback={null}>
       <ModulePage mod={mod} />

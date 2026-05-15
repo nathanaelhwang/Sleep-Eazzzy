@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LibraryPage } from '@/components/LibraryPage';
+import { TermsPage } from '@/components/TermsPage';
 import { getDictionary, isLocale } from '@/lib/i18n/getDictionary';
 import { buildPageMetadata } from '@/lib/seo';
 
@@ -13,12 +13,12 @@ export async function generateMetadata({
   const dict = await getDictionary(lang);
   return buildPageMetadata({
     lang,
-    path: '/library',
-    title: dict.t.library_title as string,
-    description: dict.t.library_sub as string,
+    path: '/terms',
+    title: (dict.t.terms as string) ?? 'Terms',
+    description: 'Plain-language ground rules for using Sleep Eazzzy.',
   });
 }
 
 export default function Page() {
-  return <LibraryPage />;
+  return <TermsPage />;
 }

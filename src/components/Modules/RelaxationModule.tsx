@@ -5,6 +5,7 @@ import type { Module } from '@/lib/data';
 import { Callout } from '../Callout';
 import { HostCard } from '../HostCard';
 import { MarkComplete } from '../MarkComplete';
+import { ModuleDisclaimer } from '../ModuleDisclaimer';
 import { ModuleHero } from '../ModuleHero';
 import { ModuleNav } from '../ModuleNav';
 import { useLang, useModContent, useT } from '../LangProvider';
@@ -26,6 +27,7 @@ export function RelaxationModule({ mod }: { mod: Module }) {
     <>
       <ModuleHero mod={mod} />
       <div className="container container-narrow mod-body">
+        <ModuleDisclaimer />
         <VideoPlayer title={`${t('module_label')} ${mod.num}: ${mod.title}`} time={mod.duration} />
         <HostCard quote={c.hostQuote} />
 

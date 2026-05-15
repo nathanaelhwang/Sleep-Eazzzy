@@ -58,6 +58,9 @@ const t = {
   about_isnt_h: 'What it isn’t',
   about_isnt_p: 'This is educational content, not personalized medical care. If your symptoms are severe, if you struggle with safety (e.g. drowsy driving), or if you suspect another sleep disorder like sleep apnea or restless leg syndrome, please see a doctor.',
   disclaimer: 'Medical disclaimer. The information on this site is for educational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider with questions about your health. If you believe you are experiencing a medical emergency, seek immediate care.',
+  disclaimer_short: 'Educational content — not a substitute for medical advice.',
+  privacy: 'Privacy',
+  terms: 'Terms',
   // Tools page
   tools_eyebrow: 'Patient Tools', tools_title: 'All your tools, in one place.',
   tools_sub: 'Each tool is also embedded in its module. Use whichever flow feels right for you.',

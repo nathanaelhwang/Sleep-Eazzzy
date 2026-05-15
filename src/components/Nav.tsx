@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AuthNav } from './AuthNav';
 import { useLang, useT } from './LangProvider';
 import { BrandMark } from './BrandMark';
 import { LangToggle } from './LangToggle';
@@ -43,6 +44,7 @@ export function Nav() {
             );
           })}
           <LangToggle />
+          <AuthNav />
         </div>
       </div>
     </nav>

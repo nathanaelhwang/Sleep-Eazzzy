@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
+import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import './styles.css';
+import { isAuthEnabled } from '@/lib/auth/config';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
 export const metadata: Metadata = {
@@ -34,9 +36,12 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return (
+  const tree = (
     <html lang="en">
       <body>{children}</body>
     </html>
   );
+  // Only mount <ClerkProvider> when auth env vars are configured; otherwise
+  // the site renders without the auth context (and <AuthNav /> short-circuits).
+  return isAuthEnabled ? <ClerkProvider>{tree}</ClerkProvider> : tree;
 }

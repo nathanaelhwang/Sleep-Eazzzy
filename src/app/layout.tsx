@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import './styles.css';
 import { isAuthEnabled } from '@/lib/auth/config';
@@ -38,7 +39,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const tree = (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Vercel Web Analytics — cookieless, no PII. Injects a tiny tracker
+            only on production deploys; no-ops during local dev. */}
+        <Analytics />
+      </body>
     </html>
   );
   // Only mount <ClerkProvider> when auth env vars are configured; otherwise

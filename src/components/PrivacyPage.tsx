@@ -38,7 +38,7 @@ export function PrivacyPage() {
 
         <div className="lesson-block">
           <p>
-            <strong>Last updated:</strong> May 2026
+            <strong>Last updated:</strong> May 14, 2026
           </p>
           <p style={{ marginTop: 10 }}>
             Sleep Eazzzy is operated by OWND LLC (&quot;we,&quot; &quot;us&quot;). This page
@@ -71,6 +71,23 @@ export function PrivacyPage() {
               server logs (IP address, request path, user agent) for a short period for
               operational and security purposes.
             </li>
+            <li>
+              <strong>Anonymous visitor counts (Vercel Web Analytics).</strong> We use the
+              cookieless analytics built into our host to count how many people visit, which
+              pages they view, top referrers, and country-level location. The tracker uses no
+              cookies, no fingerprinting, no advertising IDs, and no personally identifiable
+              information. We use it to understand which modules are most useful, nothing
+              else. See{' '}
+              <a
+                href="https://vercel.com/docs/analytics/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--denim)', textDecoration: 'underline' }}
+              >
+                Vercel&apos;s privacy policy for Web Analytics
+              </a>
+              {' '}for details.
+            </li>
           </ul>
         </div>
 
@@ -79,9 +96,8 @@ export function PrivacyPage() {
           <ul>
             <li>No sleep-diary or journal content. Reframes and routines stay on your device.</li>
             <li>
-              No third-party analytics or advertising trackers. We may add a privacy-respecting,
-              cookieless analytics service later — if and when we do, this page will be updated
-              first.
+              No advertising trackers. No personalized profiling. No third-party trackers
+              beyond the cookieless Vercel Web Analytics described above.
             </li>
             <li>No payment information — the program is free.</li>
             <li>

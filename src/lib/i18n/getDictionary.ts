@@ -6,6 +6,10 @@ const loaders = {
   es: () => import('./es').then((m) => m.dict),
   'zh-Hant': () => import('./zh-Hant').then((m) => m.dict),
   'zh-Hans': () => import('./zh-Hans').then((m) => m.dict),
+  ko: () => import('./ko').then((m) => m.dict),
+  fa: () => import('./fa').then((m) => m.dict),
+  vi: () => import('./vi').then((m) => m.dict),
+  hi: () => import('./hi').then((m) => m.dict),
 } satisfies Record<Locale, () => Promise<Dictionary>>;
 
 export const LOCALES = Object.keys(loaders) as Locale[];

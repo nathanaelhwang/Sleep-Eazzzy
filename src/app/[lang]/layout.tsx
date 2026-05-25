@@ -10,7 +10,7 @@ import { buildPageMetadata } from '@/lib/seo';
 export const dynamicParams = false;
 
 export function generateStaticParams(): { lang: Locale }[] {
-  return [{ lang: 'en' }, { lang: 'es' }, { lang: 'zh-Hant' }, { lang: 'zh-Hans' }];
+  return [{ lang: 'en' }, { lang: 'es' }, { lang: 'zh-Hant' }, { lang: 'zh-Hans' }, { lang: 'ko' }, { lang: 'fa' }, { lang: 'vi' }, { lang: 'hi' }];
 }
 
 export async function generateMetadata({
@@ -43,15 +43,6 @@ export default async function LangLayout({
 
   return (
     <LangProvider lang={lang} dict={dict}>
-      {/* The root <html lang> is set to "en" since it's owned by app/layout.tsx
-          and can't read [lang] params. Update document.documentElement.lang on
-          the client so screen readers and Lighthouse see the right value. SEO
-          alternates.languages handles search-engine locale signaling. */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `document.documentElement.lang = ${JSON.stringify(lang)};`,
-        }}
-      />
       <Nav />
       {children}
       <Footer />

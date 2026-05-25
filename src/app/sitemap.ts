@@ -13,7 +13,7 @@ const STATIC_PATHS: { path: string; priority: number }[] = [
   { path: '/terms',    priority: 0.3 },
 ];
 
-const LOCALES: Locale[] = ['en', 'es', 'zh-Hant', 'zh-Hans'];
+const LOCALES: Locale[] = ['en', 'es', 'zh-Hant', 'zh-Hans', 'ko', 'fa', 'vi', 'hi'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

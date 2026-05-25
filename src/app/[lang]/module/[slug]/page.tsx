@@ -9,7 +9,7 @@ export const dynamicParams = false;
 
 export async function generateStaticParams(): Promise<{ lang: string; slug: string }[]> {
   const out: { lang: string; slug: string }[] = [];
-  for (const lang of ['en', 'es', 'zh-Hant', 'zh-Hans'] as const) {
+  for (const lang of ['en', 'es', 'zh-Hant', 'zh-Hans', 'ko', 'fa', 'vi', 'hi'] as const) {
     const dict = await getDictionary(lang);
     for (const m of dict.modules) {
       out.push({ lang, slug: m.slug });

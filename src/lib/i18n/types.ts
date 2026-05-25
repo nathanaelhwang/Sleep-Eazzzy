@@ -6,7 +6,7 @@ import type {
   RoutineSlot,
 } from '../data';
 
-export type Locale = 'en' | 'es' | 'zh-Hant' | 'zh-Hans';
+export type Locale = 'en' | 'es' | 'zh-Hant' | 'zh-Hans' | 'ko' | 'fa' | 'vi' | 'hi';
 
 export const DEFAULT_LOCALE: Locale = 'en';
 

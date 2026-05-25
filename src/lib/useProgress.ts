@@ -39,14 +39,19 @@ function useProgressSync(): UseProgressReturn {
   const supabase = useSupabase();
   const userId = user?.id ?? null;
 
-  const [progress, setProgress] = useState<Progress>(() => storage.get('progress', {}));
+  // Start from `{}` so SSR and first-client render match; the effect below
+  // hydrates from localStorage (signed-out) or Supabase (signed-in).
+  const [progress, setProgress] = useState<Progress>({});
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (!authLoaded) return;
 
-    // Signed out — fall back to localStorage and we're done.
+    // Signed out — fall back to localStorage and we're done. The synchronous
+    // setState here is a deliberate hydration step (matches `{}` SSR, then
+    // pulls from localStorage on the client).
     if (!isSignedIn || !userId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProgress(storage.get('progress', {}));
       setIsLoaded(true);
       return;

@@ -10,9 +10,13 @@ const OG_LOCALE: Record<Locale, string> = {
   es: 'es_ES',
   'zh-Hant': 'zh_TW',
   'zh-Hans': 'zh_CN',
+  ko: 'ko_KR',
+  fa: 'fa_IR',
+  vi: 'vi_VN',
+  hi: 'hi_IN',
 };
 
-const ALL_LOCALES: Locale[] = ['en', 'es', 'zh-Hant', 'zh-Hans'];
+const ALL_LOCALES: Locale[] = ['en', 'es', 'zh-Hant', 'zh-Hans', 'ko', 'fa', 'vi', 'hi'];
 
 function languagesFor(path: string): Record<string, string> {
   const langs: Record<string, string> = {};

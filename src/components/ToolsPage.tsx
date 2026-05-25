@@ -10,17 +10,21 @@ export function ToolsPage() {
   const prefix = `/${lang}`;
 
   const tools = [
-    { title: t('quiz_label'),       desc: L('Test what you already know about sleep.', 'Pon a prueba lo que ya sabes sobre el sueño.', '測試你對睡眠的了解。', '测试你对睡眠的了解。'), mod: 'intro',           tool: '' },
+    { title: t('quiz_label'),       desc: L('Test what you already know about sleep.', 'Pon a prueba lo que ya sabes sobre el sueño.', '測試你對睡眠的了解。', '测试你对睡眠的了解。', '잠에 대해 알고 있는 것을 시험해 보세요.', 'دانش خود را درباره خواب بسنجید.', 'Thử kiến thức bạn đã có về giấc ngủ.', 'नींद के बारे में आप जो पहले से जानते हैं उसे परखें।'), mod: 'intro',           tool: '' },
     { title: t('reframe_title'),    desc: t('reframe_sub'), mod: 'cognitive', tool: 'reframe' },
-    { title: L('Deep Breathing Relaxation', 'Relajación con Respiración Profunda', '深呼吸放鬆法', '深呼吸放松法'),
+    { title: L('Deep Breathing Relaxation', 'Relajación con Respiración Profunda', '深呼吸放鬆法', '深呼吸放松法', '심호흡 이완법', 'آرامش با تنفس عمیق', 'Thư giãn bằng thở sâu', 'गहरी श्वास से विश्राम'),
       desc: t('breath_sub'),        mod: 'relaxation',     tool: 'breathing' },
-    { title: L('Progressive Muscle Relaxation', 'Relajación Muscular Progresiva', '漸進式肌肉放鬆', '渐进式肌肉放松'),
+    { title: L('Progressive Muscle Relaxation', 'Relajación Muscular Progresiva', '漸進式肌肉放鬆', '渐进式肌肉放松', '점진적 근육 이완법', 'آرامش پیش‌رونده عضلانی', 'Thư giãn cơ tiến triển', 'प्रगतिशील मांसपेशी विश्राम'),
       desc: t('pmr_step_of'),       mod: 'relaxation',     tool: 'pmr' },
     { title: L(
         'Build your Sleep Compression Therapy Schedule',
         'Crea tu horario de Terapia de Compresión del Sueño',
         '建立你的睡眠壓縮療法時程',
-        '建立你的睡眠压缩疗法时间表'
+        '建立你的睡眠压缩疗法时间表',
+        '수면 압축 치료 일정 만들기',
+        'برنامه درمان فشرده‌سازی خواب خود را بسازید',
+        'Xây lịch Liệu pháp Nén Giấc ngủ của bạn',
+        'अपना नींद संकुचन चिकित्सा कार्यक्रम बनाएँ'
       ),
       desc: t('calc_sub'),          mod: 'compression',    tool: 'calc' },
     { title: t('routine_title'),    desc: t('routine_sub'), mod: 'sleep-plan',     tool: '' },

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import type { Dictionary, Locale } from '@/lib/i18n/types';
 import type { Module } from '@/lib/data';
 
@@ -17,6 +17,14 @@ export function LangProvider({
   dict: Dictionary;
   children: React.ReactNode;
 }) {
+  // Root <html lang> is hardcoded to "en" in app/layout.tsx because that layout
+  // can't read [lang] params. Sync it here so screen readers and Lighthouse see
+  // the active locale. Also flip dir for RTL scripts (fa).
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+  }, [lang]);
+
   return <LangContext.Provider value={{ lang, dict }}>{children}</LangContext.Provider>;
 }
 
@@ -58,15 +66,19 @@ export function useModContent(id: number): Record<string, unknown> {
   return useCtx().dict.moduleContent[id] ?? {};
 }
 
-// Inline four-locale string picker — kept for one-off strings not in the dictionary
+// Inline locale string picker — kept for one-off strings not in the dictionary
 // (matches the L() helper used in the original LibraryPage / ToolsPage).
-export function useL(): (en: string, es: string, zhHant: string, zhHans: string) => string {
+export function useL(): (en: string, es: string, zhHant: string, zhHans: string, ko?: string, fa?: string, vi?: string, hi?: string) => string {
   const lang = useLang();
-  return (en, es, zhHant, zhHans) => {
+  return (en, es, zhHant, zhHans, ko, fa, vi, hi) => {
     switch (lang) {
       case 'es': return es;
       case 'zh-Hant': return zhHant;
       case 'zh-Hans': return zhHans;
+      case 'ko': return ko ?? en;
+      case 'fa': return fa ?? en;
+      case 'vi': return vi ?? en;
+      case 'hi': return hi ?? en;
       default: return en;
     }
   };

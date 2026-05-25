@@ -20,7 +20,13 @@ export function useSupabase(): SupabaseClient {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
-          accessToken: async () => (await getToken()) ?? null,
+          accessToken: async () => {
+            // Skip on the server: Clerk's getToken() only works in the browser,
+            // and the only caller that fires SSR-side is Supabase Realtime's
+            // eager initial-token fetch — we don't use Realtime here.
+            if (typeof window === 'undefined') return null;
+            return (await getToken()) ?? null;
+          },
           auth: { persistSession: false },
         }
       ),

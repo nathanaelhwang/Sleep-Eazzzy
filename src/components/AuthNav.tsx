@@ -73,5 +73,5 @@ function UserSyncEffect() {
 
 function SignInLabel() {
   const L = useL();
-  return <>{L('Sign in', 'Iniciar sesión', '登入', '登录')}</>;
+  return <>{L('Sign in', 'Iniciar sesión', '登入', '登录', '로그인', 'ورود', 'Đăng nhập', 'साइन इन करें')}</>;
 }

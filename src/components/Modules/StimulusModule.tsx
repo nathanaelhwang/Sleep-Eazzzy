@@ -25,7 +25,7 @@ export function StimulusModule({ mod }: { mod: Module }) {
       <ModuleHero mod={mod} />
       <div className="container container-narrow mod-body">
         <ModuleDisclaimer />
-        <VideoPlayer title={`${t('module_label')} ${mod.num}: ${mod.title}`} time={mod.duration} />
+        <VideoPlayer title={`${t('module_label')} ${mod.num}: ${mod.title}`} time={mod.duration} videoId={mod.videoId} />
         <HostCard quote={c.hostQuote} />
 
         <div className="lesson-block" style={{ marginTop: 24 }}>

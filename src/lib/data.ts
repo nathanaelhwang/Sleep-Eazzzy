@@ -6,6 +6,7 @@ export type Module = {
   subtitle: string;
   duration: string;
   tags: string[];
+  videoId?: string;
   bonus?: boolean;
 };
 
@@ -23,13 +24,13 @@ export type RoutineItem = { name: string; icon: string };
 export type RoutineSlot = { time: string; name: string; icon: string };
 
 export const MODULES: Module[] = [
-  { id: 1,  slug: 'intro',            num: '01', title: 'Welcome & The Sleep Quiz',     subtitle: 'Meet Wendy, learn what insomnia is, and test what you already know.',      duration: '8 min',  tags: ['Foundation', 'Quiz'] },
-  { id: 2,  slug: 'cognitive',        num: '02', title: 'Cognitive Therapy',             subtitle: 'Reframe the thoughts that keep your insomnia going.',                      duration: '10 min', tags: ['Mindset', 'Journal'] },
-  { id: 3,  slug: 'hygiene',          num: '03', title: 'Sleep Hygiene',                 subtitle: 'The do’s and don’ts that build a strong sleep foundation.',                duration: '9 min',  tags: ['Habits'] },
-  { id: 4,  slug: 'relaxation',       num: '04', title: 'Relaxation Techniques',         subtitle: '4-7-8 breathing, progressive muscle relaxation, guided imagery, and journaling.', duration: '14 min', tags: ['Practice', 'Audio'] },
-  { id: 5,  slug: 'stimulus-control', num: '05', title: 'Stimulus Control',              subtitle: 'What to do when you can’t sleep — the 5-step rule that retrains your brain.', duration: '8 min',  tags: ['Technique'] },
-  { id: 6,  slug: 'compression',      num: '06', title: 'Sleep Compression Therapy',     subtitle: 'Build sleep pressure with a custom schedule — includes a calculator.',     duration: '11 min', tags: ['Schedule', 'Tool'] },
-  { id: 7,  slug: 'sleep-plan',       num: '07', title: 'Your Sleep Plan',               subtitle: 'Pull it all together into a bedtime routine you can stick with.',          duration: '9 min',  tags: ['Plan', 'Builder'] },
+  { id: 1,  slug: 'intro',            num: '01', title: 'Welcome & The Sleep Quiz',     subtitle: 'Meet Wendy, learn what insomnia is, and test what you already know.',      duration: '8 min',  tags: ['Foundation', 'Quiz'], videoId: 'FpMiVmJgT_Y' },
+  { id: 2,  slug: 'cognitive',        num: '02', title: 'Cognitive Therapy',             subtitle: 'Reframe the thoughts that keep your insomnia going.',                      duration: '10 min', tags: ['Mindset', 'Journal'], videoId: 'CfXp2BC_PLo' },
+  { id: 3,  slug: 'hygiene',          num: '03', title: 'Sleep Hygiene',                 subtitle: 'The do’s and don’ts that build a strong sleep foundation.',                duration: '9 min',  tags: ['Habits'],             videoId: 'aVz-g6QkgG0' },
+  { id: 4,  slug: 'relaxation',       num: '04', title: 'Relaxation Techniques',         subtitle: '4-7-8 breathing, progressive muscle relaxation, guided imagery, and journaling.', duration: '14 min', tags: ['Practice', 'Audio'], videoId: '_kukyTd_YHU' },
+  { id: 5,  slug: 'stimulus-control', num: '05', title: 'Stimulus Control',              subtitle: 'What to do when you can’t sleep — the 5-step rule that retrains your brain.', duration: '8 min',  tags: ['Technique'],          videoId: 'ciErMWcPQZ0' },
+  { id: 6,  slug: 'compression',      num: '06', title: 'Sleep Compression Therapy',     subtitle: 'Build sleep pressure with a custom schedule — includes a calculator.',     duration: '11 min', tags: ['Schedule', 'Tool'],   videoId: 'gJyIhzM-gyQ' },
+  { id: 7,  slug: 'sleep-plan',       num: '07', title: 'Your Sleep Plan',               subtitle: 'Pull it all together into a bedtime routine you can stick with.',          duration: '9 min',  tags: ['Plan', 'Builder'],    videoId: 'DfQY9-Akv28' },
   { id: 8,  slug: 'medications',      num: 'B1', title: 'Sleep Medications',             subtitle: 'How meds fit (or don’t fit) alongside CBT-I.',                             duration: '6 min',  tags: ['Bonus'], bonus: true },
   { id: 9,  slug: 'positioning',      num: 'B2', title: 'Sleep Positioning',             subtitle: 'Reduce strain so chronic pain doesn’t wake you up.',                       duration: '5 min',  tags: ['Bonus'], bonus: true },
   { id: 10, slug: 'disorders',        num: 'B3', title: 'Common Sleep Disorders',        subtitle: 'Signs that suggest something other than insomnia.',                        duration: '7 min',  tags: ['Bonus'], bonus: true },

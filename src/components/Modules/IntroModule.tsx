@@ -27,7 +27,7 @@ export function IntroModule({ mod }: { mod: Module }) {
       <ModuleHero mod={mod} />
       <div className="container container-narrow mod-body">
         <ModuleDisclaimer />
-        <VideoPlayer title={`${t('module_label')} ${mod.num}: ${mod.title}`} time={mod.duration} />
+        <VideoPlayer title={`${t('module_label')} ${mod.num}: ${mod.title}`} time={mod.duration} videoId={mod.videoId} />
 
         <div className="welcome-card">
           {/* eslint-disable-next-line @next/next/no-img-element */}

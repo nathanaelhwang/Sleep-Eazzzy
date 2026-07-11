@@ -1,7 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { useDict } from '../LangProvider';
+
+gsap.registerPlugin(useGSAP);
 
 type SegKey = 'baseline' | 'stress' | 'habits';
 type SegHeights = Record<SegKey, number>;
@@ -82,6 +86,43 @@ const EN_LABELS = {
   cbtPress: 'CBT',
 };
 
+const SEG_ORDER: SegKey[] = ['baseline', 'stress', 'habits'];
+const BAR_X = 270;
+const BAR_W = 60;
+const BAR_BOTTOM = 300;
+// Stages whose change is the lesson get the long, deliberate tween.
+const SLOW_STAGES = new Set([1, 3, 4, 5]);
+
+type SegRect = { y: number; height: number };
+
+function stackSegs(seg: SegHeights): Record<SegKey, SegRect> {
+  let cursor = BAR_BOTTOM;
+  const out = {} as Record<SegKey, SegRect>;
+  for (const kind of SEG_ORDER) {
+    cursor -= seg[kind];
+    out[kind] = { y: cursor, height: seg[kind] };
+  }
+  return out;
+}
+
+function barTopY(seg: SegHeights): number {
+  return BAR_BOTTOM - SEG_ORDER.reduce((sum, k) => sum + seg[k], 0);
+}
+
+function topSegKind(seg: SegHeights): SegKey {
+  for (let i = SEG_ORDER.length - 1; i >= 0; i--) {
+    if (seg[SEG_ORDER[i]] > 0) return SEG_ORDER[i];
+  }
+  return 'baseline';
+}
+
+// Stage-0 geometry for the server-rendered SVG; GSAP owns these attributes
+// after mount, and React never writes them again (they are constants, so
+// re-renders skip them).
+const INIT_TY = STAGES_EN[0].thresholdY;
+const INIT_STACK = stackSegs(STAGES_EN[0].seg);
+const INIT_TOP = topSegKind(STAGES_EN[0].seg);
+
 export function ArousalThreshold() {
   const arousal = useDict().arousal;
 
@@ -111,64 +152,82 @@ export function ArousalThreshold() {
   };
 
   const [idx, setIdx] = useState(0);
-  const [animThreshold, setAnimThreshold] = useState(STAGES[0].thresholdY);
-  const [animSeg, setAnimSeg] = useState<SegHeights>(STAGES[0].seg);
-  const prevIdxRef = useRef(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-  useEffect(() => {
-    const targetT = STAGES[idx].thresholdY;
-    const startT = STAGES[prevIdxRef.current].thresholdY;
-    const targetSeg = STAGES[idx].seg;
-    const startSeg = STAGES[prevIdxRef.current].seg;
-    prevIdxRef.current = idx;
+  useGSAP(
+    () => {
+      // Geometry is locale-independent, so read it from the English source.
+      const stage = STAGES_EN[idx];
+      // Read the preference per interaction rather than holding a
+      // gsap.matchMedia() listener — the timeline is rebuilt on every click
+      // anyway, so listeners would only accumulate.
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const slow = SLOW_STAGES.has(idx);
 
-    const slowThreshold = idx === 3 || idx === 4;
-    const slowBar = idx === 1 || idx === 5;
-    const duration = 2800;
+      // Kill the previous timeline so a rapid click interrupts cleanly and
+      // the new tweens pick up from wherever the attributes currently are.
+      tlRef.current?.kill();
+      const tl = gsap.timeline({
+        defaults: { duration: slow ? 2.8 : 0.6, ease: slow ? 'power2.inOut' : 'power2.out' },
+      });
+      tlRef.current = tl;
 
-    if (!slowThreshold && !slowBar) {
-      setAnimThreshold(targetT);
-      setAnimSeg(targetSeg);
-      return;
-    }
+      const tY = stage.thresholdY;
+      tl.to('.zone-awake', { attr: { height: tY } }, 0)
+        .to('.zone-asleep', { attr: { y: tY, height: BAR_BOTTOM - tY } }, 0)
+        .to('.threshold-line', { attr: { y1: tY, y2: tY } }, 0)
+        .to('.threshold-text', { attr: { y: tY - 8 } }, 0);
 
-    const t0 = performance.now();
-    let raf = 0;
-    const ease = (p: number) =>
-      p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-    const step = (now: number) => {
-      const p = Math.min(1, (now - t0) / duration);
-      const e = ease(p);
-      setAnimThreshold(slowThreshold ? startT + (targetT - startT) * e : targetT);
-      if (slowBar) {
-        setAnimSeg({
-          baseline: startSeg.baseline + (targetSeg.baseline - startSeg.baseline) * e,
-          stress:   startSeg.stress   + (targetSeg.stress   - startSeg.stress)   * e,
-          habits:   startSeg.habits   + (targetSeg.habits   - startSeg.habits)   * e,
-        });
-      } else {
-        setAnimSeg(targetSeg);
+      const stacked = stackSegs(stage.seg);
+      const top = topSegKind(stage.seg);
+      for (const kind of SEG_ORDER) {
+        tl.to(`.arousal-seg--${kind}`, { attr: { ...stacked[kind] } }, 0).set(
+          `.arousal-seg--${kind}`,
+          { attr: { rx: kind === top ? 3 : 0, ry: kind === top ? 3 : 0 } },
+          0,
+        );
       }
-      if (p < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx]);
+
+      if (idx === 5) {
+        // The CBT marker starts where the bar peaked in stage 5 and rides
+        // the bar top down as CBT presses arousal below the threshold.
+        const fromY = barTopY(STAGES_EN[4].seg) - 14;
+        const toY = barTopY(stage.seg) - 14;
+        tl.set('.cbt-press', { x: 300, y: fromY, opacity: 0 }, 0)
+          .to('.cbt-press', { opacity: 1, duration: 0.7, ease: 'power1.out' }, 0)
+          .to('.cbt-press', { y: toY }, 0);
+        if (!reduce) {
+          // Infinite bob stays out of the reduced build: it would make the
+          // timeline endless, and progress(1) below couldn't skip past it.
+          tl.to(
+            '.cbt-press-arrow',
+            { y: 3, duration: 0.8, ease: 'sine.inOut', repeat: -1, yoyo: true },
+            0.7,
+          );
+        }
+      }
+
+      tl.fromTo(
+        '.threshold-stage-info',
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.45, ease: 'power1.out' },
+        0,
+      );
+
+      // Reduced motion: same timeline, rendered at its end state. Jumping
+      // (rather than building duration-0 tweens) sidesteps GSAP's
+      // zero-duration render ambiguity at position 0.
+      if (reduce) tl.progress(1);
+    },
+    { dependencies: [idx], scope: rootRef },
+  );
 
   const s = STAGES[idx];
-  const tY = animThreshold;
-  const slowStage = idx === 1 || idx === 3 || idx === 4 || idx === 5;
-
-  const segOrder: SegKey[] = ['baseline', 'stress', 'habits'];
-  const visibleSegs = segOrder
-    .map((kind) => ({ kind, h: animSeg[kind] || 0 }))
-    .filter((seg) => seg.h > 0.5);
-  const barTopY = 300 - visibleSegs.reduce((a, b) => a + b.h, 0);
-  const legendKinds = segOrder.filter((k) => s.seg[k] > 0);
+  const legendKinds = SEG_ORDER.filter((k) => s.seg[k] > 0);
 
   return (
-    <div className="threshold-viz">
+    <div className="threshold-viz" ref={rootRef}>
       <div className="threshold-header">
         <div className="threshold-eyebrow">{labels.eyebrow}</div>
         <h3>
@@ -194,53 +253,49 @@ export function ArousalThreshold() {
       </div>
 
       <svg
-        className={'threshold-svg' + (slowStage ? ' slow' : '')}
+        className="threshold-svg"
         viewBox="0 0 600 320"
         xmlns="http://www.w3.org/2000/svg"
         aria-label="Arousal threshold diagram"
       >
-        <rect className="zone-awake" x="0" y="0" width="600" height={tY} />
-        <rect className="zone-asleep" x="0" y={tY} width="600" height={300 - tY} />
+        <rect className="zone-awake" x="0" y="0" width="600" height={INIT_TY} />
+        <rect
+          className="zone-asleep"
+          x="0"
+          y={INIT_TY}
+          width="600"
+          height={BAR_BOTTOM - INIT_TY}
+        />
         <text className="zone-label" x="20" y="22">
           {labels.awake}
         </text>
-        <text className="zone-label" x="20" y={300 - 8}>
+        <text className="zone-label" x="20" y={BAR_BOTTOM - 8}>
           {labels.asleep}
         </text>
 
-        <line className="threshold-line" x1="40" y1={tY} x2="560" y2={tY} />
-        <text className="threshold-text" x="558" y={tY - 8} textAnchor="end">
+        <line className="threshold-line" x1="40" y1={INIT_TY} x2="560" y2={INIT_TY} />
+        <text className="threshold-text" x="558" y={INIT_TY - 8} textAnchor="end">
           {labels.threshold}
         </text>
 
-        {(() => {
-          const barX = 270;
-          const barW = 60;
-          const bottomY = 300;
-          let cursor = bottomY;
-          return visibleSegs.map((seg, i) => {
-            cursor -= seg.h;
-            const isTop = i === visibleSegs.length - 1;
-            return (
-              <rect
-                key={seg.kind}
-                className={'arousal-seg arousal-seg--' + seg.kind}
-                x={barX}
-                y={cursor}
-                width={barW}
-                height={seg.h}
-                rx={isTop ? 3 : 0}
-                ry={isTop ? 3 : 0}
-              />
-            );
-          });
-        })()}
+        {SEG_ORDER.map((kind) => (
+          <rect
+            key={kind}
+            className={'arousal-seg arousal-seg--' + kind}
+            x={BAR_X}
+            y={INIT_STACK[kind].y}
+            width={BAR_W}
+            height={INIT_STACK[kind].height}
+            rx={kind === INIT_TOP ? 3 : 0}
+            ry={kind === INIT_TOP ? 3 : 0}
+          />
+        ))}
         <text className="arousal-label" x="300" y="318">
           {labels.arousal}
         </text>
 
         {idx === 5 && (
-          <g className="cbt-press" transform={`translate(300, ${barTopY - 14})`}>
+          <g className="cbt-press" opacity={0}>
             <text className="cbt-press-label" x="0" y="-14" textAnchor="middle">
               {labels.cbtPress}
             </text>
@@ -264,7 +319,7 @@ export function ArousalThreshold() {
         ))}
       </div>
 
-      <div className="threshold-stage-info">
+      <div className="threshold-stage-info" aria-live="polite">
         <div className="threshold-stage-title">{s.title}</div>
         <p className="threshold-stage-desc">{s.desc}</p>
       </div>

@@ -29,6 +29,9 @@ html, body {
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
 }
+@media (prefers-reduced-motion: reduce) {
+  html, body { scroll-behavior: auto; }
+}
 
 h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; letter-spacing: -0.01em; line-height: 1.15; color: var(--night); }
 h1 { font-size: clamp(40px, 6vw, 72px); }
@@ -665,11 +668,9 @@ footer h4 { color: var(--sand); font-size: 13px; letter-spacing: 0.14em; text-tr
 }
 .threshold-svg .zone-awake {
   fill: rgba(216, 200, 172, 0.18);
-  transition: height 0.6s ease, y 0.6s ease;
 }
 .threshold-svg .zone-asleep {
   fill: rgba(22, 36, 63, 0.05);
-  transition: height 0.6s ease, y 0.6s ease;
 }
 .threshold-svg .zone-label {
   font-family: 'Inter', sans-serif;
@@ -683,13 +684,6 @@ footer h4 { color: var(--sand); font-size: 13px; letter-spacing: 0.14em; text-tr
   stroke: var(--night);
   stroke-width: 1.5;
   stroke-dasharray: 4 4;
-  transition: y1 0.6s ease, y2 0.6s ease;
-}
-.threshold-svg.slow .threshold-line,
-.threshold-svg.slow .threshold-text,
-.threshold-svg.slow .zone-awake,
-.threshold-svg.slow .zone-asleep {
-  transition: none;
 }
 .threshold-svg .threshold-text {
   font-family: 'Inter', sans-serif;
@@ -697,15 +691,10 @@ footer h4 { color: var(--sand); font-size: 13px; letter-spacing: 0.14em; text-tr
   fill: var(--night);
   font-weight: 600;
   letter-spacing: 0.04em;
-  transition: y 0.6s ease;
-}
-.threshold-svg .arousal-seg {
-  transition: y 0.6s ease, height 0.6s ease, fill 0.6s ease;
 }
 .threshold-svg .arousal-seg--baseline { fill: #7d9890; }   /* sage — calm baseline */
 .threshold-svg .arousal-seg--stress   { fill: #c97a3f; }   /* amber — acute stress, hot */
 .threshold-svg .arousal-seg--habits   { fill: #4a6178; }   /* slate-blue — chronic, sticky */
-.threshold-svg.slow .arousal-seg { transition: none; }
 .threshold-svg .arousal-label {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
@@ -738,12 +727,8 @@ footer h4 { color: var(--sand); font-size: 13px; letter-spacing: 0.14em; text-tr
 .threshold-legend-swatch--stress   { background: #c97a3f; }
 .threshold-legend-swatch--habits   { background: #4a6178; }
 
-/* CBT press-down indicator (stage 6) — fades in and the arrow gently
-   bobs downward to suggest pressing the bar lower. */
-.cbt-press {
-  animation: cbtPressIn 0.7s 0.15s ease-out both;
-  transition: transform 2.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* CBT press-down indicator (stage 6) — motion is GSAP-driven in
+   ArousalThreshold.tsx; only colors live here. */
 .cbt-press-label {
   font-family: 'Fraunces', serif;
   font-size: 13px;
@@ -754,15 +739,6 @@ footer h4 { color: var(--sand); font-size: 13px; letter-spacing: 0.14em; text-tr
 .cbt-press-arrow {
   stroke: #4a7c59;
   stroke-width: 2;
-  animation: cbtArrowBob 1.6s 0.7s ease-in-out infinite;
-}
-@keyframes cbtPressIn {
-  from { opacity: 0; transform: translate(300px, var(--cbt-from-y, -40px)); }
-  to   { opacity: 1; }
-}
-@keyframes cbtArrowBob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(3px); }
 }
 .threshold-stage-info {
   margin-top: 28px;

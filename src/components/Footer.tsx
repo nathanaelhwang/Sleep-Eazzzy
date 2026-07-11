@@ -37,7 +37,9 @@ export function Footer() {
           <div>
             <h4>{t('footer_resources')}</h4>
             <Link href={`${prefix}/about`}>{t('footer_about')}</Link>
-            <Link href={`${prefix}/about`}>{t('footer_disclaimer')}</Link>
+            <Link href={`${prefix}/privacy`}>{t('privacy')}</Link>
+            <Link href={`${prefix}/terms`}>{t('terms')}</Link>
+            <Link href={`${prefix}/privacy`}>{t('footer_disclaimer')}</Link>
           </div>
         </div>
         <div className="footer-bottom">

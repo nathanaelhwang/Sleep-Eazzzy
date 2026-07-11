@@ -2,10 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useStored } from '@/lib/useStored';
+import { useProgress, type Progress } from '@/lib/useProgress';
 import { useLang, useModules, useT } from './LangProvider';
-
-type Progress = Record<number, boolean>;
 
 export function ModulesIndex() {
   const lang = useLang();
@@ -13,7 +11,7 @@ export function ModulesIndex() {
   const mods = useModules();
   const prefix = `/${lang}`;
 
-  const [progress] = useStored<Progress>('progress', {});
+  const { progress } = useProgress();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const live: Progress = mounted ? progress : {};

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AuthNav } from './AuthNav';
 import { useLang, useT } from './LangProvider';
 import { BrandMark } from './BrandMark';
 import { LangToggle } from './LangToggle';
@@ -28,17 +29,22 @@ export function Nav() {
           <span>Sleep Ea<span className="brand-z">zzz</span>y</span>
         </Link>
         <div className="nav-links">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={'nav-link' + (l.match(pathname) ? ' active' : '')}
-              style={{ textDecoration: 'none' }}
-            >
-              {l.label}
-            </Link>
-          ))}
+          {links.map((l) => {
+            const isActive = l.match(pathname);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={'nav-link' + (isActive ? ' active' : '')}
+                style={{ textDecoration: 'none' }}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
           <LangToggle />
+          <AuthNav />
         </div>
       </div>
     </nav>

@@ -1,16 +1,13 @@
 'use client';
 
-import { useStored } from '@/lib/useStored';
+import { useProgress } from '@/lib/useProgress';
 import { useT } from './LangProvider';
-
-type Progress = Record<number, boolean>;
 
 export function MarkComplete({ moduleId }: { moduleId: number }) {
   const t = useT();
-  const [progress, setProgress] = useStored<Progress>('progress', {});
+  const { progress, setComplete } = useProgress();
   const done = !!progress[moduleId];
-  const toggle = () =>
-    setProgress({ ...progress, [moduleId]: !done });
+
   return (
     <div
       className="widget"
@@ -25,7 +22,7 @@ export function MarkComplete({ moduleId }: { moduleId: number }) {
       <button
         type="button"
         className={'btn ' + (done ? 'btn-ghost' : 'btn-primary')}
-        onClick={toggle}
+        onClick={() => setComplete(moduleId, !done)}
       >
         {done ? t('mark_uncomplete') : t('mark_complete')}
       </button>

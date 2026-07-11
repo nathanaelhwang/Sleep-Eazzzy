@@ -2,11 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useStored } from '@/lib/useStored';
+import { useProgress, type Progress } from '@/lib/useProgress';
 import { HostCard } from './HostCard';
 import { useLang, useModules, useT } from './LangProvider';
-
-type Progress = Record<number, boolean>;
 
 export function Home() {
   const lang = useLang();
@@ -14,9 +12,9 @@ export function Home() {
   const mods = useModules();
   const prefix = `/${lang}`;
 
-  const [progress] = useStored<Progress>('progress', {});
+  const { progress } = useProgress();
 
-  // Avoid hydration mismatch — only reflect stored progress after mount.
+  // Avoid hydration mismatch — only reflect progress after mount.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const live: Progress = mounted ? progress : {};

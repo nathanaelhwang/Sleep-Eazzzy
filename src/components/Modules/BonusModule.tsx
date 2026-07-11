@@ -3,6 +3,7 @@
 import type { Module } from '@/lib/data';
 import { HostCard } from '../HostCard';
 import { MarkComplete } from '../MarkComplete';
+import { ModuleDisclaimer } from '../ModuleDisclaimer';
 import { ModuleHero } from '../ModuleHero';
 import { ModuleNav } from '../ModuleNav';
 import { useModContent, useT } from '../LangProvider';
@@ -20,6 +21,7 @@ export function BonusModule({ mod }: { mod: Module }) {
     <>
       <ModuleHero mod={mod} />
       <div className="container container-narrow mod-body">
+        <ModuleDisclaimer />
         <HostCard quote={c.hostQuote} />
         <div className="lesson-block" style={{ marginTop: 24 }}>
           <p style={{ fontSize: 17 }}>{c.summary}</p>

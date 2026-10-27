@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { Locale } from './i18n/types';
 
 export const SITE_URL = 'https://sleepeazzzy.org';
-export const SITE_NAME = 'Sleep Eazzzy';
+export const SITE_NAME = 'SleepEazzzy';
 
 // Open Graph wants BCP-47 with underscores. Match each Locale to a representative region.
 const OG_LOCALE: Record<Locale, string> = {
@@ -41,10 +41,11 @@ export function buildPageMetadata(opts: {
 }): Metadata {
   const { lang, path, title, description, isHome } = opts;
   const url = `/${lang}${path}`;
-  const fullTitle = isHome ? `${SITE_NAME} — ${title}` : `${title} · ${SITE_NAME}`;
+  const fullTitle = isHome ? `${SITE_NAME}: ${title}` : `${title} | ${SITE_NAME}`;
 
   return {
-    title: fullTitle,
+    // Absolute: fullTitle already carries the site name, so skip the layout's title template.
+    title: { absolute: fullTitle },
     description,
     alternates: {
       canonical: url,

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useId, useMemo } from 'react';
 import { useStored } from '@/lib/useStored';
 import { PrintBtn } from '../PrintBtn';
 import { useDict, useLang, useT } from '../LangProvider';
 import type { RoutineItem, RoutineSlot } from '@/lib/data';
+import { fillText } from '../fill';
 
 type StoredSlot = RoutineSlot & { id?: number };
 
@@ -23,6 +24,7 @@ function isStaleDefault(routine: StoredSlot[], def: RoutineSlot[]): boolean {
 export function RoutineBuilder() {
   const t = useT();
   const lang = useLang();
+  const uid = useId();
   const { routineLib: LIBRARY, defaultRoutine: DEFAULT } = useDict();
 
   const [routine, setRoutine] = useStored<StoredSlot[]>('routine', DEFAULT);
@@ -50,10 +52,9 @@ export function RoutineBuilder() {
       const mins = h * 60 + m + 15;
       nextTime = `${String(Math.floor(mins / 60) % 24).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
     }
-    setRoutine([
-      ...routine,
-      { ...item, time: nextTime, id: Date.now() + Math.random() },
-    ]);
+    // Next id is one past the largest stored id: unique without reading the clock.
+    const id = routine.reduce((max, r) => Math.max(max, r.id ?? 0), 0) + 1;
+    setRoutine([...routine, { ...item, time: nextTime, id }]);
   };
 
   const updateTime = (origIdx: number, time: string) => {
@@ -61,11 +62,6 @@ export function RoutineBuilder() {
     copy[origIdx] = { ...copy[origIdx], time };
     setRoutine(copy);
   };
-
-  const removeItem = (origIdx: number) =>
-    setRoutine(routine.filter((_, i) => i !== origIdx));
-
-  const reset = () => setRoutine(DEFAULT);
 
   const findOrigIdx = (item: StoredSlot): number =>
     routine.findIndex(
@@ -75,24 +71,14 @@ export function RoutineBuilder() {
     );
 
   return (
-    <div className="widget">
-      <div
-        className="widget-head"
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'start',
-          flexWrap: 'wrap',
-          gap: 12,
-        }}
-      >
+    <div className="panel routine">
+      <div className="routine-head">
         <div>
-          <div className="widget-label">{t('routine_label')}</div>
           <h3>{t('routine_title')}</h3>
-          <p className="widget-sub">{t('routine_sub')}</p>
+          <p className="muted measure">{t('routine_sub')}</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" className="btn btn-ghost" onClick={reset}>
+        <div className="routine-tools no-print">
+          <button type="button" className="btn btn-quiet btn-small" onClick={() => setRoutine(DEFAULT)}>
             {t('routine_reset')}
           </button>
           <PrintBtn />
@@ -100,63 +86,53 @@ export function RoutineBuilder() {
       </div>
 
       <div className="routine-grid">
-        <div className="routine-pool">
-          <h4>{t('routine_add')}</h4>
-          {LIBRARY.map((item, i) => (
-            <button
-              key={i}
-              type="button"
-              className="routine-item"
-              onClick={() => addItem(item)}
-            >
-              <span className="routine-icon">{item.icon}</span>
-              <span>{item.name}</span>
-              <span className="routine-add">+</span>
-            </button>
-          ))}
-        </div>
-        <div className="routine-schedule">
-          <h4
-            style={{
-              fontSize: 13,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'var(--muted)',
-              marginBottom: 12,
-              fontFamily: 'Inter',
-            }}
-          >
-            {t('routine_yours')}
-          </h4>
+        <section className="routine-lib no-print" aria-labelledby={`${uid}-lib`}>
+          <h4 id={`${uid}-lib`}>{t('routine_add')}</h4>
+          <ul className="rows">
+            {LIBRARY.map((item, i) => (
+              <li key={i}>
+                <button type="button" className="routine-add" onClick={() => addItem(item)}>
+                  <span>{item.name}</span>
+                  <span className="routine-add-label" aria-hidden="true">
+                    {t('w_add')}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="routine-plan" aria-labelledby={`${uid}-plan`}>
+          <h4 id={`${uid}-plan`}>{t('routine_yours')}</h4>
           {sorted.length === 0 ? (
-            <div className="routine-empty">{t('routine_empty')}</div>
+            <p className="muted routine-empty">{t('routine_empty')}</p>
           ) : (
-            sorted.map((item, i) => {
-              const origIdx = findOrigIdx(item);
-              return (
-                <div key={i} className="routine-row">
-                  <input
-                    type="time"
-                    className="routine-time-input"
-                    value={item.time}
-                    onChange={(e) => updateTime(origIdx, e.target.value)}
-                  />
-                  <div className="routine-name">
-                    <span style={{ color: 'var(--sand)', marginRight: 8 }}>{item.icon}</span>
-                    {item.name}
-                  </div>
-                  <button
-                    type="button"
-                    className="routine-remove"
-                    onClick={() => removeItem(origIdx)}
-                  >
-                    ×
-                  </button>
-                </div>
-              );
-            })
+            <ul className="rows">
+              {sorted.map((item, i) => {
+                const origIdx = findOrigIdx(item);
+                return (
+                  <li key={item.id ?? `d${i}`} className="routine-row">
+                    <input
+                      type="time"
+                      className="inp routine-time"
+                      aria-label={fillText(t('w_routine_time'), { name: item.name })}
+                      value={item.time}
+                      onChange={(e) => updateTime(origIdx, e.target.value)}
+                    />
+                    <span className="routine-name">{item.name}</span>
+                    <button
+                      type="button"
+                      className="link-btn small no-print"
+                      onClick={() => setRoutine(routine.filter((_, j) => j !== origIdx))}
+                    >
+                      {t('w_remove')}
+                      <span className="sr">: {item.name}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

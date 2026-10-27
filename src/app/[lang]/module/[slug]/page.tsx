@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ModulePage } from '@/components/ModulePage';
 import { getDictionary, isLocale } from '@/lib/i18n/getDictionary';
@@ -48,9 +47,5 @@ export default async function Page({
   const dict = await getDictionary(lang);
   const mod = dict.modules.find((m) => m.slug === slug);
   if (!mod) notFound();
-  return (
-    <Suspense fallback={null}>
-      <ModulePage mod={mod} />
-    </Suspense>
-  );
+  return <ModulePage mod={mod} />;
 }

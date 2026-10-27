@@ -24,8 +24,8 @@ export async function generateMetadata({
   return buildPageMetadata({
     lang,
     path: '',
-    title: dict.t.eyebrow_program as string,
-    description: dict.t.hero_sub as string,
+    title: dict.t.home_meta_title as string,
+    description: (dict.t.home_sub as string).replace(/<\/?b>/g, ''),
     isHome: true,
   });
 }
@@ -44,7 +44,9 @@ export default async function LangLayout({
   return (
     <LangProvider lang={lang} dict={dict}>
       <Nav />
-      {children}
+      <main id="main" tabIndex={-1}>
+        {children}
+      </main>
       <Footer />
     </LangProvider>
   );

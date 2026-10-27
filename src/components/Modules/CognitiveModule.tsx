@@ -3,14 +3,10 @@
 import type { Module } from '@/lib/data';
 import { Callout } from '../Callout';
 import { HostCard } from '../HostCard';
-import { MarkComplete } from '../MarkComplete';
-import { ModuleDisclaimer } from '../ModuleDisclaimer';
-import { ModuleHero } from '../ModuleHero';
-import { ModuleNav } from '../ModuleNav';
-import { PullQuote } from '../PullQuote';
 import { useModContent, useT } from '../LangProvider';
-import { VideoPlayer } from '../VideoPlayer';
+import { PullQuote } from '../PullQuote';
 import { ReframeJournal } from '../Widgets/ReframeJournal';
+import { Article, ModuleShell, type ModuleItem } from './Shell';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Content = Record<string, any>;
@@ -20,51 +16,45 @@ export function CognitiveModule({ mod }: { mod: Module }) {
   const c = useModContent(2) as Content;
   const thoughts = (c.thoughts as string[] | undefined) ?? [];
 
-  return (
-    <>
-      <ModuleHero mod={mod} />
-      <div className="container container-narrow mod-body">
-        <ModuleDisclaimer />
-        <VideoPlayer title={`${t('module_label')} ${mod.num}: ${mod.title}`} time={mod.duration} videoId={mod.videoId} />
-        <HostCard quote={c.hostQuote} />
-
-        <div className="lesson-block" style={{ marginTop: 24 }}>
-          <h4>{c.h1}</h4>
+  const items: ModuleItem[] = [
+    {
+      id: 'article',
+      kind: 'article',
+      title: c.h1,
+      content: (
+        <Article title={c.h1}>
+          <HostCard quote={c.hostQuote} />
           <p>{c.p1a}</p>
           <p>{c.p1b}</p>
-        </div>
-
-        <div className="lesson-block">
-          <h4>{c.h2}</h4>
+          <h3>{c.h2}</h3>
           <ul>
             <li>{c.li1}</li>
             <li>{c.li2}</li>
           </ul>
           <p>{c.p2}</p>
-        </div>
-
-        <PullQuote>{c.pull}</PullQuote>
-
-        <div className="lesson-block">
-          <h4>{c.h3}</h4>
-          <p>{c.p3}</p>
-          <ul style={{ marginTop: 8 }}>
+          <PullQuote>{c.pull}</PullQuote>
+        </Article>
+      ),
+    },
+    {
+      id: 'thoughts',
+      kind: 'example',
+      title: c.h3,
+      content: (
+        <Article title={c.h3}>
+          <p className="muted">{c.p3}</p>
+          <ul className="rows mod-thoughts">
             {thoughts.map((th, i) => (
               <li key={i}>{th}</li>
             ))}
           </ul>
-          <p style={{ marginTop: 14 }}>{c.p3b}</p>
-        </div>
+          <p className="muted">{c.p3b}</p>
+          <Callout label={c.assignment_label}>{c.assignment}</Callout>
+        </Article>
+      ),
+    },
+    { id: 'reframe', kind: 'tool', title: t('reframe_title'), content: <ReframeJournal /> },
+  ];
 
-        <div id="tool-reframe" style={{ scrollMarginTop: 80 }}>
-          <ReframeJournal />
-        </div>
-
-        <Callout label={c.assignment_label}>{c.assignment}</Callout>
-
-        <MarkComplete moduleId={mod.id} />
-        <ModuleNav current={mod.id} />
-      </div>
-    </>
-  );
+  return <ModuleShell mod={mod} items={items} />;
 }

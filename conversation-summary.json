@@ -1,11 +1,11 @@
 {
-  "project": "Sleep Eazzzy — CBT-I patient resource website",
+  "project": "SleepEazzzy — CBT-I patient resource website",
   "owner": "OWND LLC",
   "domain_target": "sleepeazzzy.org",
   "overview": "A free, self-paced, multilingual (EN / ES / zh-Hant / zh-Hans) patient resource walking users through Cognitive Behavioral Therapy for Insomnia. Built as a single-page React app loaded via Babel-standalone from a static HTML file. Host is Wendy. Content adapted from Wendy's CBT-I video script.",
-  "primary_entry_file": "Sleep Eazzzy.html",
+  "primary_entry_file": "SleepEazzzy.html",
   "files": {
-    "Sleep Eazzzy.html": "Entry HTML. Loads React 18.3.1 + react-dom + babel-standalone (UMD with integrity hashes), then script tags for: data.jsx, i18n.jsx, i18n-zh.jsx, shared.jsx, widgets.jsx, modules.jsx, app.jsx",
+    "SleepEazzzy.html": "Entry HTML. Loads React 18.3.1 + react-dom + babel-standalone (UMD with integrity hashes), then script tags for: data.jsx, i18n.jsx, i18n-zh.jsx, shared.jsx, widgets.jsx, modules.jsx, app.jsx",
     "data.jsx": "window.SE_DATA — base English content: MODULES list, QUIZ_QUESTIONS, REFRAME_SUGGESTIONS, PMR_STEPS, HYGIENE_DOS/DONTS, ROUTINE_LIBRARY, DEFAULT_ROUTINE",
     "i18n.jsx": "window.SE_I18N — TRANSLATIONS (en + es), MODULES_I18N, QUIZ_I18N, REFRAME_I18N, PMR_I18N, HYGIENE_I18N, ROUTINE_LIB_I18N, DEFAULT_ROUTINE_I18N, MODULE_CONTENT, AROUSAL_I18N",
     "i18n-zh.jsx": "Extends window.SE_I18N with zh-Hant and zh-Hans translations (Traditional + Simplified Mandarin)",
@@ -51,7 +51,7 @@
   },
   "ownership_branding": {
     "footer_copy": "© {year} OWND LLC. Educational use only.",
-    "title": "Sleep Eazzzy · A CBT-I patient program"
+    "title": "SleepEazzzy · A CBT-I patient program"
   },
   "youtube_library": {
     "section_1_white_noise": [
@@ -79,5 +79,5 @@
     "Arousal Threshold widget animates threshold line during Medication/Tolerance transitions and bar segments during Stress/CBT transitions via requestAnimationFrame with cubic easing.",
     "Module 1 welcome card uses Wendy's actual photo (assets/wendy.png). Case cards swap Robert/Sarah photos based on lang (zh variants get assets/robert-zh.jpg / sarah-zh.jpg)."
   ],
-  "deployment_status": "User is ready to deploy to sleepeazzzy.org. Steps shared: rename Sleep Eazzzy.html → index.html, then drag-drop entire folder to Netlify Drop OR upload via existing host's file manager / FTP. DNS already needs to point at the chosen host. No build step required (Babel runs in-browser via standalone CDN script)."
+  "deployment_status": "User is ready to deploy to sleepeazzzy.org. Steps shared: rename SleepEazzzy.html → index.html, then drag-drop entire folder to Netlify Drop OR upload via existing host's file manager / FTP. DNS already needs to point at the chosen host. No build step required (Babel runs in-browser via standalone CDN script)."
 }

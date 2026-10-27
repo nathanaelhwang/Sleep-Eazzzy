@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useDict, useT } from '../LangProvider';
+import { fill } from '../fill';
 
 type PMRPhase = 'tense' | 'release';
 
@@ -43,7 +44,6 @@ export function PMRWalkthrough() {
     setPhase('tense');
     setCount(5);
   };
-  const pause = () => setRunning(false);
   const reset = () => {
     setRunning(false);
     setStep(0);
@@ -53,35 +53,50 @@ export function PMRWalkthrough() {
 
   const cur = STEPS[step];
   const phaseText = phase === 'tense' ? t('pmr_tense') : t('pmr_release');
+  // Paused part-way through (not at the start, not finished).
+  const paused = !running && count > 0 && (step > 0 || phase !== 'tense' || count < 5);
 
   return (
-    <div
-      className="widget"
-      style={{ padding: 0, background: 'transparent', border: 'none', boxShadow: 'none' }}
-    >
+    <div className="panel pmr">
+      <h3>{t('w_pmr_title')}</h3>
+      <p className="muted measure">{t('w_pmr_sub')}</p>
+
       <div className="pmr-stage">
-        <div className="pmr-progress">
+        <ol className="strip pmr-strip" aria-hidden="true">
           {STEPS.map((_, i) => (
-            <div key={i} className={i < step ? 'done' : i === step ? 'active' : ''} />
+            <li key={i} className={i < step ? 'done' : i === step ? 'cur' : undefined}>
+              <i />
+            </li>
           ))}
+        </ol>
+        <p className="pmr-meta muted small t">
+          {fill(t('w_pmr_step'), { n: step + 1, total: STEPS.length })}
+        </p>
+        <h4 className="pmr-name">{cur.name}</h4>
+        <p className="pmr-instruction measure">{cur.instruction}</p>
+        <div className="pmr-now">
+          <span className={'pmr-timer t' + (running ? '' : ' idle')} aria-hidden="true">
+            {running ? count : 5}
+          </span>
+          <span className={'pmr-phase ' + phase} aria-live="polite">
+            {running ? phaseText : ''}
+          </span>
         </div>
-        <div className="pmr-step-label">
-          {t('pmr_step_of')} {step + 1} / {STEPS.length} · {phaseText}
-        </div>
-        <div className="pmr-step-name">{cur.name}</div>
-        <div className="pmr-instruction">{cur.instruction}</div>
-        <div className="pmr-timer">{running ? count : '—'}</div>
         <div className="pmr-controls">
-          {!running ? (
-            <button type="button" className="btn btn-primary" onClick={start}>
-              {step > 0 ? t('pmr_resume') : t('pmr_begin')}
-            </button>
-          ) : (
-            <button type="button" className="btn btn-ghost" onClick={pause}>
+          {running ? (
+            <button type="button" className="btn btn-quiet" onClick={() => setRunning(false)}>
               {t('pmr_pause')}
             </button>
+          ) : paused ? (
+            <button type="button" className="btn btn-primary" onClick={() => setRunning(true)}>
+              {t('pmr_resume')}
+            </button>
+          ) : (
+            <button type="button" className="btn btn-primary" onClick={start}>
+              {t('pmr_begin')}
+            </button>
           )}
-          <button type="button" className="btn btn-ghost" onClick={reset}>
+          <button type="button" className="btn btn-quiet" onClick={reset}>
             {t('pmr_reset')}
           </button>
         </div>

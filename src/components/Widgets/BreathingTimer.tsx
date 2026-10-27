@@ -11,44 +11,31 @@ const NEXT: Record<Exclude<Phase, 'idle'>, { phase: Exclude<Phase, 'idle'>; coun
   exhale: { phase: 'inhale', count: 4 },
 };
 
+type State = { phase: Phase; count: number; cycle: number };
+
+const IDLE: State = { phase: 'idle', count: 0, cycle: 0 };
+
+/** One second of the 4-7-8 cycle: count down, then move to the next phase. */
+function tick(s: State): State {
+  if (s.phase === 'idle') return s;
+  if (s.count > 1) return { ...s, count: s.count - 1 };
+  const next = NEXT[s.phase];
+  return { phase: next.phase, count: next.count, cycle: s.phase === 'exhale' ? s.cycle + 1 : s.cycle };
+}
+
 export function BreathingTimer() {
   const t = useT();
-  const [running, setRunning] = useState(false);
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [count, setCount] = useState(0);
-  const [cycle, setCycle] = useState(0);
+  const [{ phase, count, cycle }, setState] = useState<State>(IDLE);
+  const running = phase !== 'idle';
 
   useEffect(() => {
     if (!running) return;
-    if (phase === 'idle') {
-      setPhase('inhale');
-      setCount(4);
-      return;
-    }
-    const id = setInterval(() => {
-      setCount((c) => {
-        if (c <= 1) {
-          const transition = NEXT[phase as Exclude<Phase, 'idle'>];
-          setPhase(transition.phase);
-          if (phase === 'exhale') setCycle((cy) => cy + 1);
-          return transition.count;
-        }
-        return c - 1;
-      });
-    }, 1000);
+    const id = setInterval(() => setState(tick), 1000);
     return () => clearInterval(id);
-  }, [running, phase]);
+  }, [running]);
 
-  const start = () => {
-    setRunning(true);
-    setCycle(0);
-  };
-  const stop = () => {
-    setRunning(false);
-    setPhase('idle');
-    setCount(0);
-    setCycle(0);
-  };
+  const start = () => setState({ phase: 'inhale', count: 4, cycle: 0 });
+  const stop = () => setState(IDLE);
 
   const phaseLabels: Record<Phase, string> = {
     idle:   t('breath_idle'),
@@ -58,34 +45,36 @@ export function BreathingTimer() {
   };
 
   return (
-    <div className="widget">
-      <div className="widget-head">
-        <div className="widget-label">{t('breath_label')}</div>
-        <h3>{t('breath_title')}</h3>
-        <p className="widget-sub">{t('breath_sub')}</p>
-      </div>
+    <div className="panel breath">
+      <h3>{t('w_breath_title')}</h3>
+      <p className="muted measure">{t('breath_sub')}</p>
 
       <div className="breath-stage">
-        <div className={'breath-circle ' + phase}>
-          <div style={{ textAlign: 'center' }}>
-            <div className="breath-phase">{phaseLabels[phase]}</div>
-            <div className="breath-count">{running && count > 0 ? count : '—'}</div>
-          </div>
-        </div>
-        <div className="breath-cycle">
-          {running ? `${t('breath_cycle')} ${cycle + 1}` : t('breath_try')}
-        </div>
-        <div className="breath-controls">
-          {!running ? (
-            <button type="button" className="btn btn-primary" onClick={start}>
-              {t('breath_begin')}
-            </button>
-          ) : (
-            <button type="button" className="btn btn-ghost" onClick={stop}>
-              {t('breath_stop')}
-            </button>
+        <div className={'breath-circle ' + phase} aria-hidden="true" />
+        <div className="breath-read">
+          <span className="breath-phase" aria-live="polite">
+            {phaseLabels[phase]}
+          </span>
+          {running && count > 0 && (
+            <span className="breath-count t" aria-hidden="true">
+              {count}
+            </span>
           )}
         </div>
+      </div>
+      <div className="breath-foot">
+        {!running ? (
+          <button type="button" className="btn btn-primary" onClick={start}>
+            {t('breath_begin')}
+          </button>
+        ) : (
+          <button type="button" className="btn btn-quiet" onClick={stop}>
+            {t('breath_stop')}
+          </button>
+        )}
+        <span className="muted small t">
+          {running ? `${t('breath_cycle')} ${cycle + 1}` : t('breath_try')}
+        </span>
       </div>
     </div>
   );

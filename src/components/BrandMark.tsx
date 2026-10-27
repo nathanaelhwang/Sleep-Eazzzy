@@ -1,8 +1,11 @@
+// Two nights on a clock axis: time in bed (amber) with sleep inside it, then a
+// full night of sleep. The site's chart device, reduced to a logo.
 export function BrandMark() {
   return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <circle cx="14" cy="14" r="13" fill="#0f1e3a" />
-      <path d="M18.5 16.5a6 6 0 0 1-8-8 6 6 0 1 0 8 8z" fill="#c9b89a" />
+    <svg width="26" height="18" viewBox="0 0 26 18" aria-hidden="true">
+      <rect x="0" y="2" width="26" height="5" rx="1" fill="var(--awake)" />
+      <rect x="8" y="2" width="14" height="5" fill="var(--asleep)" />
+      <rect x="0" y="11" width="26" height="5" rx="1" fill="var(--asleep)" />
     </svg>
   );
 }

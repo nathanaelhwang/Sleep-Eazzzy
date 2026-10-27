@@ -15,7 +15,7 @@ export async function generateMetadata({
     lang,
     path: '/tools',
     title: dict.t.tools_title as string,
-    description: dict.t.tools_sub as string,
+    description: dict.t.tools_lede as string,
   });
 }
 

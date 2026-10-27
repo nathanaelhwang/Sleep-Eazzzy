@@ -1,0 +1,68 @@
+/* pages styles: tools, sounds, about, privacy, terms. Builds on tokens and primitives in base.css. */
+
+/* First block under a .page-head: closer than a full .section gap. */
+.pg-body { margin-top: clamp(32px, 5vw, 56px); }
+
+/* ---------- Tools: two-column ruled list ---------- */
+.tools-index {
+  list-style: none; margin-inline: 0; margin-bottom: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 64px;
+}
+.tools-index li { border-top: 1px solid var(--line); }
+.tools-index a { display: grid; gap: 4px; padding: 18px 0 22px; text-decoration: none; color: var(--ink); }
+.tools-name { font-size: var(--s-18); font-weight: 600; line-height: 1.3; }
+.tools-index a:hover .tools-name { text-decoration: underline; text-decoration-thickness: 2px; }
+.tools-desc { max-width: 52ch; line-height: 1.5; }
+.tools-where { margin-top: 2px; font-size: var(--s-15); color: var(--muted); }
+@media (max-width: 720px) { .tools-index { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Sounds: thumbnail grid, click to load the embed ---------- */
+.snd-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 40px 28px;
+}
+.snd-media { position: relative; aspect-ratio: 16 / 9; border-radius: 4px; background: var(--empty); }
+.snd-media iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 4px; }
+.snd-play { position: absolute; inset: 0; display: block; width: 100%; padding: 0; border: 0; border-radius: 4px; background: none; color: var(--ink); }
+.snd-play img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+.snd-chip {
+  position: absolute; inset-inline-start: 12px; bottom: 12px;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 36px; padding: 0 14px; border-radius: 4px;
+  background: var(--page); color: var(--ink); font-size: var(--s-15); font-weight: 600;
+}
+.snd-chip svg { flex: none; }
+.snd-play:hover .snd-chip { text-decoration: underline; }
+.snd-title { margin-top: 14px; font-size: var(--s-18); line-height: 1.3; }
+.snd-sub { margin-top: 4px; font-size: var(--s-15); color: var(--muted); }
+
+/* ---------- About: prose beside the "see a doctor" block ---------- */
+.about-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px 64px; align-items: start; }
+.about-cols h2 { font-size: var(--s-24); letter-spacing: -0.01em; margin-bottom: 12px; }
+.about-text section + section { margin-top: 40px; }
+.about-isnt > p { max-width: 52ch; }
+.about-doctor { margin-top: 24px; border-inline-start: 4px solid var(--awake); padding-block: 4px; padding-inline-start: 20px; }
+.about-doctor h3 { font-family: var(--font); font-stretch: normal; font-size: var(--s-18); font-weight: 600; letter-spacing: 0; margin-bottom: 8px; }
+.about-doctor ul { margin: 0; padding-inline-start: 1.1em; }
+.about-doctor li + li { margin-top: 4px; }
+@media (max-width: 860px) { .about-cols { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Privacy and terms: contents list beside long-form text ---------- */
+.page-head .legal-meta { font-size: var(--s-15); }
+.legal { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 40px 64px; align-items: start; }
+.legal-toc { position: sticky; top: 24px; font-size: var(--s-15); }
+.legal-toc h2 { font-family: var(--font); font-stretch: normal; font-size: var(--s-15); font-weight: 600; letter-spacing: 0; line-height: 1.4; margin-bottom: 10px; }
+.legal-toc ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.legal-toc li { border-bottom: 1px solid var(--line); }
+.legal-toc a { display: block; padding: 8px 0; color: var(--muted); text-decoration: none; }
+.legal-toc a:hover { color: var(--ink); text-decoration: underline; }
+.legal .prose h2 { font-size: var(--s-24); letter-spacing: -0.01em; }
+.legal .prose section { scroll-margin-top: 24px; }
+.legal .prose > * + section, .legal .prose > section + p { margin-top: 40px; }
+.legal .prose section h2 { margin-top: 0; }
+.legal-lang { margin-bottom: 32px; }
+.legal-also { color: var(--muted); font-size: var(--s-15); }
+@media (max-width: 860px) {
+  .legal { grid-template-columns: minmax(0, 1fr); }
+  .legal-toc { position: static; }
+}

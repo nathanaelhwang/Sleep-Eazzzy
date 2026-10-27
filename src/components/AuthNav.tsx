@@ -42,17 +42,7 @@ function AuthNavInner() {
 
   return (
     <SignInButton mode="modal">
-      <button
-        type="button"
-        className="nav-link"
-        style={{
-          cursor: 'pointer',
-          background: 'none',
-          border: 'none',
-          font: 'inherit',
-          padding: 0,
-        }}
-      >
+      <button type="button" className="signin">
         <SignInLabel />
       </button>
     </SignInButton>

@@ -66,6 +66,12 @@ export function useModContent(id: number): Record<string, unknown> {
   return useCtx().dict.moduleContent[id] ?? {};
 }
 
+/** Locale digits for counts (Persian digits in fa, for example). */
+export function useNum(): (n: number) => string {
+  const fmt = new Intl.NumberFormat(useLang());
+  return (n) => fmt.format(n);
+}
+
 // Inline locale string picker — kept for one-off strings not in the dictionary
 // (matches the L() helper used in the original LibraryPage / ToolsPage).
 export function useL(): (en: string, es: string, zhHant: string, zhHans: string, ko?: string, fa?: string, vi?: string, hi?: string) => string {

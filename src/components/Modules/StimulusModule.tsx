@@ -3,55 +3,53 @@
 import type { Module } from '@/lib/data';
 import { Callout } from '../Callout';
 import { HostCard } from '../HostCard';
-import { MarkComplete } from '../MarkComplete';
-import { ModuleDisclaimer } from '../ModuleDisclaimer';
-import { ModuleHero } from '../ModuleHero';
-import { ModuleNav } from '../ModuleNav';
+import { useModContent } from '../LangProvider';
 import { PullQuote } from '../PullQuote';
-import { useModContent, useT } from '../LangProvider';
-import { VideoPlayer } from '../VideoPlayer';
+import { Article, ModuleShell, type ModuleItem } from './Shell';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Content = Record<string, any>;
 type Step = { t: string; b: string };
 
 export function StimulusModule({ mod }: { mod: Module }) {
-  const t = useT();
   const c = useModContent(5) as Content;
   const steps = (c.steps as Step[] | undefined) ?? [];
 
-  return (
-    <>
-      <ModuleHero mod={mod} />
-      <div className="container container-narrow mod-body">
-        <ModuleDisclaimer />
-        <VideoPlayer title={`${t('module_label')} ${mod.num}: ${mod.title}`} time={mod.duration} videoId={mod.videoId} />
-        <HostCard quote={c.hostQuote} />
-
-        <div className="lesson-block" style={{ marginTop: 24 }}>
-          <h4>{c.why_h}</h4>
+  const items: ModuleItem[] = [
+    {
+      id: 'article',
+      kind: 'article',
+      title: c.why_h,
+      content: (
+        <Article title={c.why_h}>
+          <HostCard quote={c.hostQuote} />
           <p>{c.why_p1}</p>
           <p>{c.why_p2}</p>
-        </div>
+          <PullQuote>{c.pull}</PullQuote>
+        </Article>
+      ),
+    },
+    {
+      id: 'rule',
+      kind: 'article',
+      title: c.rule_h,
+      content: (
+        <Article title={c.rule_h}>
+          <ol className="steps">
+            {steps.map((s, i) => (
+              <li key={i}>
+                <span>
+                  <b>{s.t}</b>
+                  <span className="step-body">{s.b}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <Callout label={c.feels_label}>{c.feels}</Callout>
+        </Article>
+      ),
+    },
+  ];
 
-        <PullQuote>{c.pull}</PullQuote>
-
-        <h3 style={{ marginTop: 36, marginBottom: 16 }}>{c.rule_h}</h3>
-        {steps.map((s, i) => (
-          <div key={i} className="flow-step">
-            <div className="flow-num">{i + 1}</div>
-            <div>
-              <h4>{s.t}</h4>
-              <p>{s.b}</p>
-            </div>
-          </div>
-        ))}
-
-        <Callout label={c.feels_label}>{c.feels}</Callout>
-
-        <MarkComplete moduleId={mod.id} />
-        <ModuleNav current={mod.id} />
-      </div>
-    </>
-  );
+  return <ModuleShell mod={mod} items={items} />;
 }

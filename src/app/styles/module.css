@@ -1,0 +1,240 @@
+/* Module pages. Builds on tokens and primitives in base.css. */
+
+/* ---------- Title block ---------- */
+.mod-top { padding-top: clamp(28px, 5vw, 56px); }
+.crumb { font-size: var(--s-15); color: var(--muted); }
+
+/* Progress strip: one segment per core module, width = video minutes. */
+.mod-strip { margin-top: 24px; }
+.mod-strip a { display: block; text-decoration: none; color: var(--muted); font-size: var(--s-15); line-height: 1.3; font-variant-numeric: tabular-nums; }
+.mod-strip a i { margin-bottom: 6px; }
+.mod-strip a:hover .full { text-decoration: underline; }
+.mod-strip .cur a, .mod-strip a[aria-current='page'] { color: var(--ink); font-weight: 600; }
+.mod-strip .num-only { display: none; }
+/* Responds to the page column, not the viewport: the column narrows when the sheet opens. */
+@container main (max-width: 640px) {
+  .mod-strip .full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .mod-strip .num-only { display: inline; }
+}
+
+.mod-title { margin-top: 36px; }
+.mod-title h1 { max-width: 20ch; }
+.mod-title .meta { margin-top: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mod-title .sub { margin-top: 12px; font-size: clamp(1.125rem, 1.6vw, 1.3125rem); color: var(--muted); max-width: 52ch; }
+.mod-disclaimer { margin-top: 16px; }
+
+/* ---------- Stage: the page, plus a sheet that slides in beside it ----------
+   Closed: one column, content centred. Open: the sheet's column grows from 0,
+   the page column narrows, and the centred content drifts left to make room.
+   The sheet floats (the one elevated surface on the site) and stays in view
+   while the page scrolls. Under 900px it covers the page instead. */
+.mod-stage {
+  --sheet-w: min(600px, 44vw);
+  --slide: 0.55s var(--ease);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 0px;
+  column-gap: 0;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  overflow-x: clip; /* clip, not hidden: keeps the sheet's sticky positioning */
+  transition: grid-template-columns var(--slide), column-gap var(--slide);
+}
+.mod-stage[data-open] { grid-template-columns: minmax(0, 1fr) var(--sheet-w); column-gap: clamp(24px, 3vw, 48px); }
+.mod-stage[data-wide] { --sheet-w: min(880px, 58vw); }
+.mod-main { min-width: 0; container: main / inline-size; }
+.mod-main-inner { max-width: 880px; margin-inline: auto; }
+.mod-lead { margin-top: 32px; }
+.mod-lede { font-size: clamp(1.125rem, 1.6vw, 1.3125rem); line-height: 1.5; }
+.mod-notice { margin-top: 24px; }
+.mod-notice .warn { padding: 18px 22px; }
+.mod-notice .warn h3 { font-size: var(--s-18); }
+.mod-notice .warn p { margin-top: 6px; }
+
+/* Items: what the module offers besides the video. Each opens the sheet. */
+.mod-items-h { font-family: var(--font); font-stretch: normal; font-size: var(--s-15); font-weight: 600; letter-spacing: 0; color: var(--muted); margin: 40px 0 12px; }
+.mod-items { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.mod-items li { border-bottom: 1px solid var(--line); }
+.mod-item {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  width: 100%; padding: 18px 8px 18px 16px; background: none; border: 0;
+  border-inline-start: 3px solid transparent; color: var(--ink); text-align: start;
+  transition: border-color 0.3s var(--ease), background-color 0.3s var(--ease);
+}
+.mod-item-t { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; }
+.mod-item-k { flex: none; font-size: var(--s-15); color: var(--muted); }
+.mod-item:hover .mod-item-t { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+.mod-item[aria-expanded='true'] { border-inline-start-color: var(--awake); background: color-mix(in srgb, var(--awake) 9%, transparent); }
+.mod-item[aria-expanded='true'] .mod-item-k { color: var(--awake-text); }
+
+/* The sheet */
+.mod-sheet { min-width: 0; }
+.mod-sheet-inner {
+  position: sticky; top: 16px; margin-top: 16px;
+  width: var(--sheet-w); max-height: calc(100dvh - 32px);
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: var(--lift);
+  visibility: hidden; opacity: 0; transform: translateX(calc(40px * var(--dir)));
+  transition: opacity 0.3s var(--ease), transform var(--slide), width var(--slide), visibility 0s linear 0.55s;
+}
+.mod-stage[data-open] .mod-sheet-inner {
+  visibility: visible; opacity: 1; transform: none;
+  transition: opacity 0.35s var(--ease) 0.1s, transform var(--slide), width var(--slide), visibility 0s;
+}
+.mod-sheet-inner:focus-visible { outline-offset: -3px; }
+.mod-sheet-bar {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 10px 12px 10px clamp(20px, 3vw, 36px);
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.mod-sheet-kind { font-size: var(--s-15); color: var(--muted); }
+.mod-sheet-close {
+  display: grid; place-items: center; width: 40px; height: 40px;
+  background: none; border: 1px solid transparent; border-radius: 4px; color: var(--ink);
+}
+.mod-sheet-close:hover { border-color: var(--control-line); }
+.mod-sheet-body { padding: 28px clamp(20px, 3vw, 36px) 36px; container: sheet / inline-size; }
+.mod-sheet-foot { padding: 0 clamp(20px, 3vw, 36px) 32px; }
+.sheet-item:not([hidden]) { animation: sheet-in 0.4s var(--ease); }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(8px); } }
+.sheet-item > * + * { margin-top: 28px; }
+
+/* Content inside the sheet: articles and tools share one rhythm.
+   Hierarchy, top down: item title (display face, 28px) > section heading
+   (display face, 20px, wide gap above) > label (body face, semibold) > body.
+   Quotes are set in the body face with a rule, so they never read as headings. */
+.sheet-article > h2 { font-size: 1.75rem; line-height: 1.15; letter-spacing: -0.015em; margin-bottom: 24px; }
+.sheet-article > h3 { font-size: 1.25rem; line-height: 1.25; margin-top: 44px; }
+.sheet-article > * + * { margin-top: 16px; }
+/* Articles use the sheet's full width (tables, figures); running text keeps a readable measure. */
+.sheet-article { max-width: none; }
+.sheet-article > :is(p, ul, ol, .host, .mod-pull) { max-width: 66ch; }
+.sheet-article > h2 + *, .sheet-article > h3 + * { margin-top: 8px; }
+.sheet-article > :is(.host, .mod-pull, .note, .warn, .steps, .rows, .dd, .cases, .mod-figs, .key) { margin-top: 32px; }
+.sheet-article > h2 + :is(.host, .mod-pull, .note, .warn, .steps, .rows, .dd, .cases, .mod-figs) { margin-top: 0; }
+.sheet-article .mod-lede { font-size: var(--s-18); font-weight: 500; }
+.sheet-item .panel { background: none; border: 0; border-radius: 0; padding: 0; }
+.sheet-item .panel > h3:first-child, .sheet-item .routine-head h3 { font-size: 1.75rem; line-height: 1.15; letter-spacing: -0.015em; }
+.prose :is(.rows, .steps) { padding-inline-start: 0; }
+.prose :is(.rows, .steps) > li + li { margin-top: 0; }
+@container sheet (max-width: 640px) {
+  /* Scoped to the sheet so these win over the widgets' own two-column layouts (widgets.css loads later). */
+  .mod-sheet-body :is(.mod-figs, .reframe-grid, .routine-grid, .calc-out) { grid-template-columns: 1fr; }
+  .mod-sheet-body .calc-out { align-items: start; }
+  /* Nights: label and value share a line, the bar gets the full width below (as on phones). */
+  .nrow { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+  .nrow .lab { grid-column: 1; grid-row: 1; }
+  .nrow .val { grid-column: 2; grid-row: 1; text-align: end; }
+  .nrow .track, .nrow .axis { grid-column: 1 / -1; grid-row: 2; }
+  .nrow.axis-row > :not(.axis) { display: none; }
+  .nrow.axis-row .axis { grid-row: 1; }
+  .axis span.odd { visibility: hidden; }
+}
+
+@media (max-width: 900px) {
+  .mod-stage, .mod-stage[data-open] { grid-template-columns: minmax(0, 1fr); column-gap: 0; }
+  .mod-main { transition: transform var(--slide), opacity var(--slide); }
+  .mod-stage[data-open] .mod-main { transform: translateX(calc(-16% * var(--dir))); opacity: 0.35; }
+  .mod-sheet { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+  .mod-stage[data-open] .mod-sheet { pointer-events: auto; }
+  .mod-sheet-inner {
+    position: absolute; inset: 0; margin: 0; width: auto; max-height: none;
+    border: 0; border-radius: 0; opacity: 1; transform: translateX(calc(100% * var(--dir)));
+  }
+}
+
+/* ---------- Video ---------- */
+.video { position: relative; aspect-ratio: 16 / 9; background: var(--asleep); overflow: hidden; border-radius: 4px; }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-empty { background: var(--surface); border: 1px solid var(--line); }
+.video-empty img { position: absolute; inset-inline-end: 0; top: 0; height: 100%; width: auto; max-width: none; opacity: 0.9; }
+.video-empty .vtitle { position: absolute; inset-inline-start: 24px; top: 22px; font-weight: 600; font-size: var(--s-24); line-height: 1.2; letter-spacing: -0.01em; max-width: 14ch; }
+.video-empty .vnote { position: absolute; inset-inline-start: 24px; bottom: 24px; font-size: var(--s-15); color: var(--muted); max-width: 26ch; }
+@media (max-width: 520px) {
+  .video-empty .vtitle { font-size: var(--s-18); inset-inline-start: 16px; top: 14px; }
+  .video-empty .vnote { inset-inline-start: 16px; bottom: 16px; }
+}
+
+/* ---------- Wendy and pull quotes ---------- */
+.host { margin: 0; }
+.host .pull { margin: 0; }
+.host .by { margin-top: 12px; color: var(--muted); font-size: var(--s-15); }
+.host-photo { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 18px; align-items: start; }
+.host-photo img { width: 88px; height: 96px; object-fit: cover; border-radius: 4px; }
+/* Quotes: body face, a slate rule at the start edge, one step above body size.
+   (No margin here: blockquote margins are reset in base.css, and article spacing must win.) */
+:is(.host .pull, .mod-pull) {
+  padding-inline-start: 18px; border-inline-start: 3px solid var(--asleep);
+  font-family: var(--font); font-size: 1.1875rem; line-height: 1.5; font-weight: 500; letter-spacing: 0;
+}
+
+/* ---------- Lists ---------- */
+.steps .step-body { display: block; margin-top: 4px; color: var(--muted); }
+.mod-thoughts > li { font-size: var(--s-18); }
+
+
+/* Do / Don't: a two-column comparison. A tinted header names each column;
+   colour lives only in the headers. Stacks only when there is no room for two columns. */
+.dd {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+}
+.dd > div + div { border-inline-start: 1px solid var(--line); }
+.dd h3 { margin: 0; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.dd-do { color: var(--good); background: color-mix(in srgb, var(--good) 10%, var(--surface)); }
+.dd-dont { color: var(--bad); background: color-mix(in srgb, var(--bad) 10%, var(--surface)); }
+.dd .rows { padding-inline: 18px; }
+.dd .rows > li:first-child { border-top: 0; }
+.dd .rows > li:last-child { border-bottom: 0; }
+@container sheet (max-width: 440px) {
+  .dd { grid-template-columns: 1fr; }
+  .dd > div + div { border-inline-start: 0; border-top: 1px solid var(--line); }
+}
+
+/* ---------- Case studies (module 1) ---------- */
+.cases { display: grid; gap: 48px; margin-bottom: 24px; }
+.case { display: grid; gap: 16px; }
+.case-id { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 16px; align-items: center; }
+.case-id img { width: 56px; height: 56px; object-fit: cover; border-radius: 4px; }
+/* Labels inside lists and stories use the body face (tier 2). */
+:is(.dd, .case-id) h3 { font-family: var(--font); font-stretch: normal; font-size: var(--s-18); font-weight: 600; letter-spacing: 0; }
+.case-story { max-width: 62ch; }
+.case-sum { max-width: 62ch; color: var(--muted); }
+.case-sum strong { color: var(--ink); font-weight: 600; }
+
+/* Bob's nights (module 6) */
+.sheet-article .nights + .key { margin-top: 20px; }
+.nrow .lab .t { display: block; }
+
+/* ---------- Figures (bonus: positions) ---------- */
+.mod-figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+.mod-figs figure { margin: 0; }
+.mod-figs img { width: 100%; border-radius: 4px; }
+.mod-figs figcaption { margin-top: 10px; font-size: var(--s-15); color: var(--muted); }
+@media (max-width: 720px) { .mod-figs { grid-template-columns: 1fr; } }
+
+/* ---------- Related links ---------- */
+.mod-libline { margin-top: 12px; }
+.mod-libline a { color: var(--ink); }
+
+/* ---------- End of module ---------- */
+.mod-end { display: grid; gap: 32px; margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line); }
+.mod-done { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.done-btn[aria-pressed='true'] { background: transparent; color: var(--ink); border-color: var(--asleep); }
+.pn { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pn a { text-decoration: none; display: grid; gap: 2px; padding: 16px 0; align-content: start; }
+.pn a:hover .pt { text-decoration: underline; }
+.pn .pk { font-size: var(--s-15); color: var(--muted); }
+.pn .pt { font-weight: 600; font-size: var(--s-18); }
+.pn .next { text-align: end; }
+@media (max-width: 520px) {
+  .pn { grid-template-columns: 1fr; gap: 0; }
+  .pn > span:empty { display: none; }
+  .pn .next { text-align: start; border-top: 1px solid var(--line); }
+}
+
+@media print {
+  .mod-strip, .mod-end, .video, .mod-items-wrap, .mod-sheet { display: none; }
+}

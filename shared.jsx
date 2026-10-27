@@ -86,7 +86,7 @@ function Nav({ route }) {
       <div className="container nav-inner">
         <div className="brand" onClick={() => navigate('/')}>
           <BrandMark />
-          <span>Sleep Ea<span className="brand-z">zzz</span>y</span>
+          <span>SleepEa<span className="brand-z">zzz</span>y</span>
         </div>
         <div className="nav-links">
           <div className={"nav-link" + (route === '/' ? ' active' : '')} onClick={() => navigate('/')}>{t('home')}</div>

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useDict, useT, useTArr } from '../LangProvider';
+import { useId, useState } from 'react';
+import { useDict, useT } from '../LangProvider';
 import type { LocalizedQuizQuestion, RichQuizOption } from '@/lib/i18n/types';
+import { fill } from '../fill';
 
 type Revealed = ReadonlySet<number>;
 
@@ -19,89 +20,77 @@ function normalizeOption(
 
 export function SleepQuiz() {
   const t = useT();
-  const tArr = useTArr();
   const Q = useDict().quiz;
+  const uid = useId();
 
   const [tapped, setTapped] = useState<Revealed[]>(() => Q.map(() => new Set<number>()));
 
-  const tap = (qi: number, oi: number) => {
+  // Checking an answer reveals whether it's right and why; unchecking hides it again.
+  const toggle = (qi: number, oi: number) => {
     setTapped((prev) => {
       const next = prev.slice();
       const s = new Set(next[qi]);
-      s.add(oi);
+      if (s.has(oi)) s.delete(oi);
+      else s.add(oi);
       next[qi] = s;
       return next;
     });
   };
 
-  const reset = () => setTapped(Q.map(() => new Set<number>()));
-
-  const qWords = tArr('quiz_q_words');
-
   return (
-    <div className="quiz-block">
-      <div className="quiz-intro">
-        <div className="quiz-intro-eyebrow">{t('quiz_intro_eyebrow')}</div>
-        <h3>
-          {t('quiz_intro_h')} <em>{t('quiz_intro_h_em')}</em>
-        </h3>
-        <p>{t('quiz_intro_p')}</p>
-      </div>
-
+    <div className="panel quiz">
+      <h3>{t('w_quiz_title')}</h3>
       {Q.map((q, qi) => {
         const revealedSet = tapped[qi];
-        const allRevealed = revealedSet && revealedSet.size === q.options.length;
+        const allRevealed = revealedSet.size === q.options.length;
         return (
-          <div key={qi} className="quiz-card">
-            <div className="quiz-q-num">
-              {t('quiz_q_label')} {qWords[qi] ?? qi + 1}
-            </div>
-            <h4 className="quiz-q">{q.q}</h4>
-            <div className="quiz-options">
+          <section key={qi} className="quiz-q" aria-labelledby={`${uid}-${qi}`}>
+            <p className="muted small t">{fill(t('w_quiz_q'), { n: qi + 1, total: Q.length })}</p>
+            <h4 id={`${uid}-${qi}`}>{q.q}</h4>
+            <ul className="rows quiz-options">
               {q.options.map((rawOpt, oi) => {
                 const opt = normalizeOption(rawOpt, q, oi);
                 const isRevealed = revealedSet.has(oi);
                 const isCorrect = oi === q.correct;
-                let cls = 'quiz-option';
-                if (isRevealed) {
-                  cls += ' revealed';
-                  cls += isCorrect ? ' correct' : ' incorrect';
-                }
+                const state = isRevealed ? (isCorrect ? ' correct' : ' incorrect') : '';
                 return (
-                  <button
-                    key={oi}
-                    type="button"
-                    className={cls}
-                    onClick={() => tap(qi, oi)}
-                    aria-expanded={isRevealed}
-                  >
-                    <span className="quiz-option-letter">{String.fromCharCode(65 + oi)}</span>
-                    <span className="quiz-option-body">
-                      <span className="quiz-option-text">
-                        {isRevealed && (
-                          <span className={'quiz-badge ' + (isCorrect ? 'right' : 'wrong')}>
-                            {isCorrect ? t('quiz_correct_short') : t('quiz_wrong_short')}
-                          </span>
-                        )}
-                        {opt.text}
-                      </span>
-                      {isRevealed && opt.explanation && (
-                        <span className="quiz-option-explanation">{opt.explanation}</span>
+                  <li key={oi} className={'quiz-option' + state}>
+                    <label className="quiz-check">
+                      <input
+                        type="checkbox"
+                        checked={isRevealed}
+                        onChange={() => toggle(qi, oi)}
+                        aria-describedby={isRevealed && opt.explanation ? `${uid}-${qi}-${oi}` : undefined}
+                      />
+                      <span className="quiz-option-text">{opt.text}</span>
+                      {isRevealed && (
+                        <span className="quiz-verdict">
+                          {isCorrect ? t('w_quiz_correct') : t('quiz_wrong_short')}
+                        </span>
                       )}
-                    </span>
-                  </button>
+                    </label>
+                    {isRevealed && opt.explanation && (
+                      <p id={`${uid}-${qi}-${oi}`} className="quiz-explanation">
+                        {opt.explanation}
+                      </p>
+                    )}
+                  </li>
                 );
               })}
-            </div>
+            </ul>
             {!allRevealed && revealedSet.size > 0 && (
-              <div className="quiz-hint">{t('quiz_hint')}</div>
+              <p className="quiz-hint muted small">{t('quiz_hint')}</p>
             )}
-          </div>
+          </section>
         );
       })}
 
       <div className="quiz-foot">
-        <button type="button" className="btn btn-ghost" onClick={reset}>
+        <button
+          type="button"
+          className="btn btn-quiet btn-small"
+          onClick={() => setTapped(Q.map(() => new Set<number>()))}
+        >
           {t('quiz_reset')}
         </button>
       </div>

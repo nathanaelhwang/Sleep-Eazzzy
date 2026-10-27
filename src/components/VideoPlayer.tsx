@@ -2,14 +2,14 @@
 
 import { useT } from './LangProvider';
 
-export function VideoPlayer({ title, time, videoId }: { title: string; time?: string; videoId?: string }) {
+/** 16:9 frame holding the module's YouTube embed, or a still with a note when there is no video yet. */
+export function VideoPlayer({ title, videoId }: { title: string; videoId?: string }) {
   const t = useT();
 
   if (videoId) {
     return (
-      <div className="video-card video-card-embed">
+      <div className="video">
         <iframe
-          className="video-embed"
           src={`https://www.youtube.com/embed/${videoId}`}
           title={title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -21,15 +21,11 @@ export function VideoPlayer({ title, time, videoId }: { title: string; time?: st
   }
 
   return (
-    <div className="video-card">
-      <div className="video-ph-text">{t('video_placeholder')}</div>
-      <div className="video-play" title={t('video_play')}>
-        <span style={{ marginLeft: 4 }}>▶</span>
-      </div>
-      <div className="video-meta">
-        <div className="video-title">{title}</div>
-        {time && <div className="video-time">{time}</div>}
-      </div>
+    <div className="video video-empty">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/assets/wendy.png" alt="" width={323} height={351} />
+      <p className="vtitle">{title}</p>
+      <p className="vnote">{t('mod_video_none')}</p>
     </div>
   );
 }

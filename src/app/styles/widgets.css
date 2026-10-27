@@ -1,0 +1,168 @@
+/* widgets styles. Builds on tokens and primitives in base.css. */
+
+/* Shared: the muted line under each panel title. */
+.panel > h3 + .muted { margin-bottom: 28px; }
+.panel h4 { font-size: var(--s-18); }
+
+/* ---------- Sleep compression calculator ---------- */
+.calc-form { display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: end; }
+.calc-form .inp[type='time'] { width: auto; min-width: 10ch; }
+.stepper { display: flex; gap: 6px; }
+.stepper .inp { width: 5.5ch; text-align: center; -moz-appearance: textfield; appearance: textfield; }
+.stepper .inp::-webkit-inner-spin-button,
+.stepper .inp::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 56px; min-height: 56px; color: var(--ink); background: transparent;
+  border: 1px solid var(--control-line); border-radius: 4px;
+}
+.stepper button:hover { border-color: var(--ink); }
+.stepper .inp { min-height: 56px; }
+.calc-out { margin-top: 36px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 56px; align-items: end; }
+.bedtime .lbl { font-size: var(--s-15); color: var(--muted); }
+.bedtime .big {
+  font-family: var(--font-head); font-stretch: var(--head-stretch);
+  font-size: clamp(2.75rem, 6vw, var(--s-64)); font-weight: 700; letter-spacing: -0.03em;
+  line-height: 1; font-variant-numeric: tabular-nums; margin-top: 4px; white-space: nowrap;
+}
+.calc-facts { display: grid; gap: 4px; padding-bottom: 6px; }
+.calc-facts b { font-weight: 600; }
+.calc-chart { margin-top: 32px; }
+.calc-key { margin-top: 16px; }
+.calc-warn { margin-top: 32px; }
+.calc-warn h4 { font-size: var(--s-18); }
+@media (max-width: 640px) { .calc-out { grid-template-columns: 1fr; } }
+
+/* ---------- Arousal threshold model ---------- */
+/* Three arousal sources, drawn from tokens so both themes work:
+   baseline = a pale slate, stress = amber, chronic habits = full slate. */
+.threshold {
+  --seg-baseline: color-mix(in srgb, var(--asleep) 40%, var(--surface));
+  --seg-stress: var(--awake);
+  --seg-habits: var(--asleep);
+}
+.threshold-stages { display: flex; flex-wrap: wrap; gap: 2px; }
+.threshold-stages button { display: inline-flex; align-items: center; gap: 8px; }
+.threshold-stage-num { opacity: 0.7; }
+.threshold-svg { display: block; width: 100%; max-width: 640px; height: auto; margin-top: 28px; }
+.threshold-svg .zone-awake { fill: color-mix(in srgb, var(--awake) 12%, transparent); }
+.threshold-svg .zone-asleep { fill: color-mix(in srgb, var(--asleep) 8%, transparent); }
+.threshold-svg .zone-label { font-size: 15px; font-weight: 600; fill: var(--muted); }
+.threshold-svg .threshold-line { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 5 5; }
+.threshold-svg .threshold-text { font-size: 15px; font-weight: 600; fill: var(--ink); }
+.threshold-svg .arousal-seg--baseline { fill: var(--seg-baseline); }
+.threshold-svg .arousal-seg--stress { fill: var(--seg-stress); }
+.threshold-svg .arousal-seg--habits { fill: var(--seg-habits); }
+.threshold-svg .arousal-label { font-size: 14px; fill: var(--muted); text-anchor: middle; }
+.cbt-press-label { font-size: 15px; font-weight: 700; fill: var(--good); }
+.cbt-press-arrow { stroke: var(--good); stroke-width: 2.5; }
+.threshold-legend { margin-top: 16px; }
+.sw.threshold-sw--baseline { background: var(--seg-baseline); }
+.sw.threshold-sw--stress { background: var(--seg-stress); }
+.sw.threshold-sw--habits { background: var(--seg-habits); }
+.threshold-stage-info { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+.threshold-stage-info p { margin-top: 8px; }
+
+/* ---------- 4-7-8 breathing ---------- */
+.breath-stage { display: grid; place-items: center; padding: 56px 0; overflow: hidden; }
+.breath-stage > * { grid-area: 1 / 1; }
+.breath-circle {
+  width: 200px; height: 200px; border-radius: 50%;
+  background: var(--asleep);
+  transition: transform 4s cubic-bezier(0.4, 0, 0.6, 1);
+}
+.breath-circle.inhale { transform: scale(1.35); transition-duration: 4s; }
+.breath-circle.hold { transform: scale(1.35); transition-duration: 7s; }
+.breath-circle.exhale { transform: scale(1); transition-duration: 8s; }
+.breath-circle.idle { transform: scale(1); }
+/* The countdown sits on the circle. position + z-index keep it above the circle,
+   which paints on top of plain siblings once it is transformed. */
+.breath-read {
+  position: relative; z-index: 1;
+  display: grid; justify-items: center; gap: 2px; color: var(--on-asleep); text-align: center; padding: 0 16px; max-width: 200px;
+}
+.breath-phase { font-size: var(--s-18); font-weight: 600; }
+.breath-count { font-family: var(--font-head); font-stretch: var(--head-stretch); font-size: var(--s-64); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+.breath-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+@media (prefers-reduced-motion: reduce) {
+  .breath-circle, .breath-circle.inhale, .breath-circle.hold, .breath-circle.exhale { transform: none; }
+}
+
+/* ---------- Progressive muscle relaxation ---------- */
+.pmr-strip > li { flex: 1; }
+.pmr-meta { margin-top: 12px; }
+.pmr-name { margin-top: 20px; font-size: var(--s-24); }
+.pmr-instruction { margin-top: 8px; }
+.pmr-now { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 20px; margin-top: 24px; }
+.pmr-timer { font-family: var(--font-head); font-stretch: var(--head-stretch); font-size: clamp(3rem, 8vw, 5rem); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+.pmr-timer.idle { color: var(--muted); }
+.pmr-phase { font-size: var(--s-18); font-weight: 600; }
+.pmr-phase.tense { color: var(--awake-text); }
+.pmr-controls { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+/* ---------- Sleep quiz ---------- */
+.quiz > h3 + .quiz-q { margin-top: 24px; }
+.quiz-q + .quiz-q { margin-top: 40px; }
+.quiz-q h4 { margin: 4px 0 14px; }
+/* Each answer is a checkbox: checking it reveals the verdict and the explanation. */
+.quiz-check {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 4px 14px;
+  padding: 4px 0; font-size: var(--s-18); cursor: pointer;
+}
+.quiz-check input {
+  appearance: none; -webkit-appearance: none; margin: 0; width: 22px; height: 22px;
+  display: grid; place-content: center; cursor: pointer;
+  background: var(--surface); border: 2px solid var(--control-line); border-radius: 4px; color: var(--ink);
+}
+.quiz-check input::before {
+  content: ''; width: 12px; height: 12px; background: currentColor; transform: scale(0);
+  clip-path: polygon(14% 44%, 0 59%, 40% 100%, 100% 22%, 86% 8%, 39% 70%);
+  transition: transform 0.15s var(--ease);
+}
+.quiz-check input:checked { border-color: currentColor; }
+.quiz-check input:checked::before { transform: scale(1); }
+.quiz-check:hover .quiz-option-text { text-decoration: underline; text-underline-offset: 0.2em; }
+.quiz-option.correct input { color: var(--good); }
+.quiz-option.incorrect input { color: var(--bad); }
+.quiz-verdict { font-size: var(--s-15); font-weight: 600; }
+.quiz-option.correct .quiz-verdict { color: var(--good); }
+.quiz-option.incorrect .quiz-verdict { color: var(--bad); }
+.quiz-explanation { margin-top: 6px; margin-inline-start: 36px; font-size: var(--s-15); color: var(--muted); max-width: 62ch; }
+.quiz-hint { margin-top: 10px; }
+.quiz-foot { margin-top: 32px; }
+
+/* ---------- Reframe journal ---------- */
+.reframe-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.reframe-actions { margin-top: 16px; }
+.reframe-sub { margin: 32px 0 12px; }
+.reframe-suggestions { display: flex; flex-wrap: wrap; gap: 8px; }
+.reframe-entries > li { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.reframe-pair { display: grid; gap: 4px; min-width: 0; }
+.reframe-pair p:last-child { font-weight: 600; }
+.reframe-suggestions .btn { padding-block: 8px; text-align: start; font-weight: 500; }
+@media (max-width: 640px) { .reframe-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Bedtime routine builder ---------- */
+.routine-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 16px; }
+.routine-head .muted { margin-top: 8px; }
+.routine-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.routine-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 40px; margin-top: 28px; }
+.routine-grid h4 { margin-bottom: 12px; }
+.routine-lib .rows > li { padding: 0; }
+.routine-add {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  width: 100%; min-height: 48px; padding: 8px 0; background: none; border: 0; text-align: start;
+}
+.routine-add-label { font-size: var(--s-15); font-weight: 600; color: var(--muted); }
+.routine-add:hover .routine-add-label { color: var(--ink); text-decoration: underline; }
+.routine-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; }
+.routine-time { width: auto; min-height: 40px; font-size: var(--s-15); }
+.routine-empty { padding: 14px 0; border-top: 1px solid var(--line); }
+.routine-plan .rows > li { padding: 10px 0; }
+@media (max-width: 760px) { .routine-grid { grid-template-columns: 1fr; } }
+
+@media print {
+  .panel.routine { border: 0; padding: 0; background: none; }
+  .routine-grid { display: block; margin-top: 16px; }
+  .routine-time { border: 0; padding: 0; background: none; }
+}

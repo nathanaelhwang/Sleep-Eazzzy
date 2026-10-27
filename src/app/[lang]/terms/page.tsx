@@ -15,7 +15,7 @@ export async function generateMetadata({
     lang,
     path: '/terms',
     title: (dict.t.terms as string) ?? 'Terms',
-    description: 'Plain-language ground rules for using Sleep Eazzzy.',
+    description: 'Plain-language ground rules for using SleepEazzzy.',
   });
 }
 

@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { useDict } from '../LangProvider';
+import { useDict, useT } from '../LangProvider';
 
 gsap.registerPlugin(useGSAP);
 
@@ -70,9 +70,6 @@ const STAGES_EN: Stage[] = [
 ];
 
 const EN_LABELS = {
-  eyebrow: 'The Arousal Threshold Model',
-  heading: 'How insomnia takes hold,',
-  headingEm: 'and how it’s undone.',
   awake: 'Awake',
   asleep: 'Asleep',
   threshold: 'Insomnia threshold',
@@ -125,6 +122,7 @@ const INIT_TOP = topSegKind(STAGES_EN[0].seg);
 
 export function ArousalThreshold() {
   const arousal = useDict().arousal;
+  const t = useT();
 
   // Merge English defaults with any locale-specific overrides.
   const STAGES: Stage[] = STAGES_EN.map((s, i) => ({
@@ -135,9 +133,6 @@ export function ArousalThreshold() {
   }));
 
   const labels = {
-    eyebrow:   arousal?.eyebrow   ?? EN_LABELS.eyebrow,
-    heading:   arousal?.heading   ?? EN_LABELS.heading,
-    headingEm: arousal?.headingEm ?? EN_LABELS.headingEm,
     awake:     arousal?.awake     ?? EN_LABELS.awake,
     asleep:    arousal?.asleep    ?? EN_LABELS.asleep,
     threshold: arousal?.threshold ?? EN_LABELS.threshold,
@@ -227,27 +222,15 @@ export function ArousalThreshold() {
   const legendKinds = SEG_ORDER.filter((k) => s.seg[k] > 0);
 
   return (
-    <div className="threshold-viz" ref={rootRef}>
-      <div className="threshold-header">
-        <div className="threshold-eyebrow">{labels.eyebrow}</div>
-        <h3>
-          {labels.heading} <em>{labels.headingEm}</em>
-        </h3>
-        <div className="threshold-hint">{labels.hint}</div>
-      </div>
+    <div className="panel threshold" ref={rootRef}>
+      <h3>{t('w_arousal_title')}</h3>
+      <p className="muted measure">{labels.hint}</p>
 
-      <div className="threshold-stages" role="tablist">
+      <div className="seg threshold-stages" role="group" aria-label={t('w_arousal_stages')}>
         {STAGES.map((stg, i) => (
-          <button
-            key={i}
-            type="button"
-            className={'threshold-stage-btn' + (i === idx ? ' active' : '')}
-            onClick={() => setIdx(i)}
-            role="tab"
-            aria-selected={i === idx}
-          >
-            <span className="threshold-stage-num">{String(i + 1).padStart(2, '0')}</span>
-            <span>{stg.label}</span>
+          <button key={i} type="button" onClick={() => setIdx(i)} aria-pressed={i === idx}>
+            <span className="threshold-stage-num t">{i + 1}</span>
+            {stg.label}
           </button>
         ))}
       </div>
@@ -256,7 +239,8 @@ export function ArousalThreshold() {
         className="threshold-svg"
         viewBox="0 0 600 320"
         xmlns="http://www.w3.org/2000/svg"
-        aria-label="Arousal threshold diagram"
+        role="img"
+        aria-label={t('w_arousal_svg')}
       >
         <rect className="zone-awake" x="0" y="0" width="600" height={INIT_TY} />
         <rect
@@ -266,10 +250,10 @@ export function ArousalThreshold() {
           width="600"
           height={BAR_BOTTOM - INIT_TY}
         />
-        <text className="zone-label" x="20" y="22">
+        <text className="zone-label" x="16" y="26">
           {labels.awake}
         </text>
-        <text className="zone-label" x="20" y={BAR_BOTTOM - 8}>
+        <text className="zone-label" x="16" y={BAR_BOTTOM - 10}>
           {labels.asleep}
         </text>
 
@@ -310,18 +294,18 @@ export function ArousalThreshold() {
         )}
       </svg>
 
-      <div className="threshold-legend">
+      <ul className="key threshold-legend">
         {legendKinds.map((kind) => (
-          <div key={kind} className="threshold-legend-item">
-            <span className={'threshold-legend-swatch threshold-legend-swatch--' + kind} />
-            <span>{labels.legend[kind]}</span>
-          </div>
+          <li key={kind}>
+            <span className={'sw threshold-sw--' + kind} aria-hidden="true" />
+            {labels.legend[kind]}
+          </li>
         ))}
-      </div>
+      </ul>
 
       <div className="threshold-stage-info" aria-live="polite">
-        <div className="threshold-stage-title">{s.title}</div>
-        <p className="threshold-stage-desc">{s.desc}</p>
+        <h4>{s.title}</h4>
+        <p className="muted measure">{s.desc}</p>
       </div>
     </div>
   );

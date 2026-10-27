@@ -2,14 +2,13 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Sleep Eazzzy',
-    short_name: 'Sleep Eazzzy',
-    description:
-      'A free CBT-I patient program — seven short modules to help you sleep better, without the pills.',
+    name: 'SleepEazzzy',
+    short_name: 'SleepEazzzy',
+    description: 'A free, video-guided course in CBT-I: seven short modules to help you sleep better without sleeping pills.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#f4f1ec',
-    theme_color: '#0f1e3a',
+    background_color: '#161B26',
+    theme_color: '#161B26',
     icons: [
       {
         src: '/icon.svg',

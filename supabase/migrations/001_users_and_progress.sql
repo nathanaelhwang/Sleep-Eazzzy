@@ -1,5 +1,5 @@
 -- ============================================================================
--- Sleep Eazzzy — Migration 001: users + progress tables with RLS
+-- SleepEazzzy — Migration 001: users + progress tables with RLS
 -- ============================================================================
 -- Run this once in the Supabase SQL editor after enabling Clerk as a
 -- "Third-party Authentication" provider in Authentication → Sign In / Up

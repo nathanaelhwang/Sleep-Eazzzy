@@ -33,9 +33,6 @@ export type ModuleContent = Record<number, Record<string, unknown>>;
 export type ArousalStage = { label: string; title: string; desc: string };
 
 export type ArousalContent = {
-  eyebrow: string;
-  heading: string;
-  headingEm: string;
   awake: string;
   asleep: string;
   threshold: string;

@@ -415,7 +415,7 @@ function Footer() {
           <div>
             <div className="brand" style={{color: 'var(--cream)'}}>
               <BrandMark/>
-              <span style={{color: 'var(--cream)'}}>Sleep Ea<span style={{color: 'var(--sand)'}}>zzz</span>y</span>
+              <span style={{color: 'var(--cream)'}}>SleepEa<span style={{color: 'var(--sand)'}}>zzz</span>y</span>
             </div>
             <p>{t('footer_tag')}</p>
           </div>

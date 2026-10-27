@@ -15,7 +15,7 @@ export async function generateMetadata({
     lang,
     path: '/privacy',
     title: (dict.t.privacy as string) ?? 'Privacy',
-    description: 'How Sleep Eazzzy handles your information. We collect as little as possible — and we never sell it.',
+    description: 'How SleepEazzzy handles your information. We collect as little as possible, and we never sell it.',
   });
 }
 

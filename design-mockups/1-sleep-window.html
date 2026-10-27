@@ -1,0 +1,1214 @@
+<!doctype html>
+<!--
+  SleepEazzzy mockup 1: "Sleep window"
+
+  PLAN
+  The whole design is one visual device borrowed from the CBT-I sleep diary: a horizontal bar on a
+  clock axis (6 PM to noon). The long bar is time in bed (lamp amber = lying awake), the bars laid
+  over it are time actually asleep (slate indigo). It appears in the hero (Robert's night, toggled
+  Before / After 4 weeks), the module list (each module is a bar on a 69-minute axis, so length
+  encodes duration and position encodes sequence), the case studies, Bob's narrowing-then-widening
+  example, and the live calculator output.
+
+  Palette (light)            Palette (dark: the page becomes night, asleep bars read as light)
+  page     #EEF0F3           page     #161B26
+  surface  #FFFFFF           surface  #1E2533
+  ink      #1B2230           ink      #E7EAF0
+  muted    #5A6474           muted    #9AA3B2
+  line     #D3D8E0           line     #2E3646
+  asleep   #2E3A59           asleep   #8C9CC8
+  awake    #E0A33A           awake    #E6B04F
+  awake as text #9A6512      awake as text #E6B04F
+  Contrast adjustments: none to the given hexes. Added one token per mode for empty bars
+  (#C3CAD4 light / #4A5470 dark) because "line" in dark (#2E3646) is invisible on the surface.
+  muted on page: 5.3:1 light, 6.9:1 dark. Amber text #9A6512 on white: 5.0:1.
+
+  Type: Hanken Grotesk 400/500/600/700, everything. 15 / 18 / 24 / 36 / 64. Headings 600 with
+  negative tracking, body 18px/1.55. tabular-nums on every time and duration.
+
+  Layout: left-aligned, single strong left edge. Hero = headline, one sub line, full-width night
+  chart with toggle, two CTAs. Program = rows (number | title + line | duration bar | status).
+  Tools and sounds = plain two-column lists. Radius 4-6px on controls only; no shadows.
+
+  Tells check: no eyebrows, no caps labels, no accented headline word, no middle-dot meta, no
+  arrows on buttons, no mono labels, no card grid, no gradients, no scroll animations. Numbers only
+  on the 7 core modules and the 5 compression steps (real sequences). Removed after review: the
+  amber wash behind the "Up next" module row (the amber bar and status text already say it).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SleepEazzzy: a free CBT-I program for insomnia</title>
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('se_theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page: #EEF0F3;
+    --surface: #FFFFFF;
+    --ink: #1B2230;
+    --muted: #5A6474;
+    --line: #D3D8E0;
+    --asleep: #2E3A59;
+    --awake: #E0A33A;
+    --awake-text: #9A6512;
+    --empty: #C3CAD4;
+    --on-asleep: #FFFFFF;
+    --focus: #2E3A59;
+    --grid: rgba(27, 34, 48, .09);
+    --photo-tint: rgba(27, 34, 48, .3);
+    color-scheme: light;
+
+    /* Production would extend this stack with Noto Sans Arabic, Noto Sans Devanagari,
+       Noto Sans KR, Noto Sans TC and Noto Sans SC for the fa / hi / ko / zh locales. */
+    --font: "Hanken Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+
+    --s-15: .9375rem;
+    --s-18: 1.125rem;
+    --s-24: 1.5rem;
+    --s-36: 2.25rem;
+    --s-64: 4rem;
+    --wrap: 1200px;
+    --gutter: clamp(16px, 4vw, 40px);
+    --ease: cubic-bezier(.65, 0, .35, 1);
+  }
+  [data-theme="dark"] {
+    --page: #161B26;
+    --surface: #1E2533;
+    --ink: #E7EAF0;
+    --muted: #9AA3B2;
+    --line: #2E3646;
+    --asleep: #8C9CC8;
+    --awake: #E6B04F;
+    --awake-text: #E6B04F;
+    --empty: #4A5470;
+    --on-asleep: #161B26;
+    --focus: #E6B04F;
+    --grid: rgba(231, 234, 240, .07);
+    --photo-tint: rgba(10, 13, 20, .5);
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: var(--s-18);
+    line-height: 1.55;
+    font-weight: 400;
+  }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; text-underline-offset: .2em; text-decoration-thickness: 1px; }
+  a:hover { text-decoration-thickness: 2px; }
+  h1, h2, h3 { font-weight: 600; margin: 0; color: var(--ink); }
+  h1 { font-size: clamp(2.5rem, 6.4vw, var(--s-64)); line-height: 1.02; letter-spacing: -.03em; }
+  h2 { font-size: clamp(1.75rem, 3.4vw, var(--s-36)); line-height: 1.1; letter-spacing: -.02em; }
+  h3 { font-size: var(--s-24); line-height: 1.25; letter-spacing: -.01em; }
+  p { margin: 0; }
+  .t, time, .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  .small { font-size: var(--s-15); }
+  .measure { max-width: 62ch; }
+  .sr {
+    position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 2px; }
+  h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+
+  .skip { position: absolute; left: 8px; top: -60px; background: var(--surface); padding: 8px 12px; z-index: 10; border-radius: 4px; }
+  .skip:focus { top: 8px; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: .5em;
+    min-height: 48px; padding: 0 20px;
+    font: inherit; font-size: var(--s-18); font-weight: 600; line-height: 1.2;
+    border-radius: 6px; border: 2px solid transparent;
+    text-decoration: none; cursor: pointer;
+  }
+  .btn-primary { background: var(--asleep); color: var(--on-asleep); }
+  .btn-primary:hover { text-decoration: underline; }
+  .btn-quiet { background: transparent; color: var(--ink); border-color: var(--line); }
+  [data-theme="dark"] .btn-quiet { border-color: #46506A; }
+  .btn-quiet:hover { border-color: var(--ink); }
+  .btn .t { font-weight: 500; opacity: .85; }
+
+  /* ---------- Header ---------- */
+  .site-header { border-bottom: 1px solid var(--line); background: var(--page); }
+  .site-header .wrap { display: flex; align-items: center; gap: 24px; min-height: 72px; flex-wrap: wrap; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1875rem; letter-spacing: -.015em; text-decoration: none; }
+  .brand svg { flex: none; }
+  .nav { display: flex; gap: 4px; margin-right: auto; }
+  .nav a {
+    text-decoration: none; padding: 8px 10px; border-radius: 4px; color: var(--muted); font-weight: 500;
+  }
+  .nav a:hover { color: var(--ink); }
+  .nav a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); border-radius: 0; }
+  .tools-bar { display: flex; align-items: center; gap: 8px; }
+  .select, .theme-btn {
+    font: inherit; font-size: var(--s-15); color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 4px; min-height: 40px; padding: 0 10px; cursor: pointer;
+  }
+  .theme-btn { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+  .theme-btn .knob { width: 28px; height: 8px; border-radius: 4px; background: var(--awake); position: relative; }
+  .theme-btn .knob::after {
+    content: ""; position: absolute; top: 0; left: 0; width: 14px; height: 8px; border-radius: 4px; background: var(--asleep);
+    transition: transform .25s var(--ease);
+  }
+  .theme-btn[aria-pressed="true"] .knob::after { transform: translateX(14px); }
+  .signin { font-size: var(--s-15); font-weight: 500; padding: 8px 4px; }
+
+  @media (max-width: 900px) {
+    .site-header .wrap { gap: 8px 16px; padding-top: 12px; }
+    .brand { margin-right: auto; }
+    .nav { order: 3; width: calc(100% + 2 * var(--gutter)); margin: 0 calc(-1 * var(--gutter)); padding: 0 calc(var(--gutter) - 10px) 4px; overflow-x: auto; }
+    .nav a { white-space: nowrap; }
+  }
+  @media (max-width: 480px) {
+    .signin { display: none; }
+    .theme-btn .lbl { display: none; }
+    .select { max-width: 112px; }
+  }
+
+  /* ---------- Views ---------- */
+  [hidden] { display: none !important; }
+  section { padding: clamp(56px, 8vw, 104px) 0 0; }
+  .sec-head { display: grid; gap: 12px; margin-bottom: 36px; }
+
+  /* ---------- The device: a night on a clock axis ---------- */
+  .axis { position: relative; height: 24px; }
+  .axis span {
+    position: absolute; top: 0; transform: translateX(-50%);
+    font-size: var(--s-15); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .axis span:first-child { transform: none; }
+  .axis span:last-child { transform: translateX(-100%); }
+  @media (max-width: 640px) { .axis span.odd { visibility: hidden; } }
+  .track { position: relative; height: 20px; }
+  .track .grid { position: absolute; inset: -6px 0; pointer-events: none; }
+  .track .grid i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--grid); }
+  .bar {
+    position: absolute; top: 0; height: 100%;
+    transition: left .9s var(--ease), width .9s var(--ease);
+  }
+  .bar.bed { background: var(--awake); border-radius: 2px; }
+  .bar.sleep { background: var(--asleep); }
+  .bar.ghost { background: var(--empty); border-left: 2px solid var(--surface); }
+
+  .key { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: var(--s-15); color: var(--muted); margin: 0; padding: 0; list-style: none; }
+  .key li { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 18px; height: 10px; border-radius: 2px; display: inline-block; }
+  .sw.sleep { background: var(--asleep); }
+  .sw.bed { background: var(--awake); }
+  .sw.ghost { background: var(--empty); }
+
+  /* Rows of nights sharing one axis (cases, Bob, calculator) */
+  .nights { display: grid; gap: 14px; }
+  .nrow { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr) 7.5rem; align-items: center; gap: 16px; }
+  .nrow .lab { font-size: var(--s-15); color: var(--muted); line-height: 1.3; }
+  .nrow .lab b { display: block; color: var(--ink); font-weight: 600; }
+  .nrow .val { font-size: var(--s-15); font-variant-numeric: tabular-nums; line-height: 1.3; }
+  .nrow .val b { font-weight: 600; }
+  @media (max-width: 640px) {
+    .nrow { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+    .nrow .lab { grid-column: 1; grid-row: 1; }
+    .nrow .val { grid-column: 2; grid-row: 1; text-align: right; }
+    .nrow .track, .nrow .axis { grid-column: 1 / -1; grid-row: 2; }
+    .nrow.axis-row > :not(.axis) { display: none; }
+    .nrow.axis-row .axis { grid-row: 1; }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-top: clamp(40px, 7vw, 88px); }
+  .hero h1 { max-width: 12ch; }
+  .hero .sub { margin-top: 20px; font-size: clamp(1.125rem, 1.6vw, 1.3125rem); max-width: 46ch; color: var(--muted); }
+  .hero .sub strong { color: var(--ink); font-weight: 600; }
+  .night-hero { margin: 48px 0 0; }
+  .night-hero .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-bottom: 28px; }
+  .night-hero .who { font-weight: 600; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; padding: 3px; background: var(--surface); }
+  .seg button {
+    font: inherit; font-size: var(--s-15); font-weight: 600; color: var(--muted);
+    background: transparent; border: 0; border-radius: 4px; min-height: 40px; padding: 0 16px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--asleep); color: var(--on-asleep); }
+  .stage { position: relative; padding: 34px 0 48px; }
+  .stage .track { height: 56px; }
+  .stage .track .grid { inset: -34px 0 -52px; }
+  .night-hero .axis { margin-top: 0; }
+  .night-hero .totals { margin-top: 32px; }
+  .flag {
+    position: absolute; font-size: var(--s-15); white-space: nowrap; font-variant-numeric: tabular-nums;
+    transition: left .9s var(--ease), opacity .3s;
+    line-height: 1.2;
+  }
+  .flag.up { top: 0; }
+  .flag.up.end { transform: translateX(-100%); text-align: right; }
+  .flag.up::after { content: ""; position: absolute; top: 100%; height: 14px; width: 2px; background: var(--awake); left: 0; }
+  .flag.up.end::after { left: auto; right: 0; }
+  .flag.down { bottom: 0; transform: translateX(-50%); color: var(--ink); font-weight: 600; }
+  .flag .k { color: var(--muted); font-weight: 400; }
+  .totals { display: flex; flex-wrap: wrap; gap: 12px 48px; margin-top: 8px; padding: 0; list-style: none; }
+  .totals li { display: grid; gap: 2px; }
+  .totals .n { font-size: var(--s-36); font-weight: 600; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .totals .n.sleep { color: var(--asleep); }
+  .totals .n.awake { color: var(--awake-text); }
+  .totals .d { font-size: var(--s-15); color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 44px; }
+  .cta-note { margin-top: 14px; font-size: var(--s-15); color: var(--muted); }
+  @media (max-width: 640px) {
+    .flag.down { display: none; }
+    .flag.up.end { top: auto; bottom: 10px; }
+    .flag.up.end::after { top: auto; bottom: 100%; }
+    .stage { padding-bottom: 44px; }
+    .stage .track { height: 44px; }
+    .stage .track .grid { inset: -34px 0 -44px; }
+    .totals { gap: 12px 28px; }
+    .totals .n { font-size: 1.75rem; }
+    .cta-row .btn { width: 100%; justify-content: center; }
+  }
+
+  /* ---------- Program ---------- */
+  .program-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 32px 64px; align-items: end; margin-bottom: 40px; }
+  .program-head .lede { margin-top: 14px; color: var(--muted); max-width: 44ch; }
+  .wendy { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 18px; align-items: start; }
+  .wendy img { width: 88px; height: 96px; object-fit: cover; border-radius: 4px; }
+  .wendy blockquote { margin: 0; font-size: var(--s-18); line-height: 1.45; font-weight: 500; }
+  .wendy .by { margin-top: 8px; font-size: var(--s-15); color: var(--muted); }
+  .progress-line { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-bottom: 20px; }
+
+  .modules { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .modules li { border-bottom: 1px solid var(--line); }
+  .mrow {
+    display: grid; grid-template-columns: 2.5rem minmax(0, 1.15fr) minmax(0, 1fr) 7rem;
+    gap: 6px 24px; align-items: center; padding: 20px 4px; text-decoration: none; color: inherit;
+  }
+  .mrow:hover .mt { text-decoration: underline; text-decoration-thickness: 1px; }
+  .mrow .no { font-size: var(--s-24); font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; align-self: start; line-height: 1.25; }
+  .mrow .mt { font-size: var(--s-24); font-weight: 600; letter-spacing: -.01em; line-height: 1.25; }
+  .mrow .md { color: var(--muted); font-size: var(--s-15); margin-top: 2px; }
+  .mrow .mb { position: relative; height: 14px; }
+  .mrow .mb .rail { position: absolute; inset: 6px 0; background: var(--grid); }
+  .mrow .mb .b { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: var(--empty); }
+  .mrow.done .mb .b { background: var(--asleep); }
+  .mrow.next .mb .b { background: var(--awake); }
+  .mrow .st { font-size: var(--s-15); font-weight: 600; text-align: right; line-height: 1.3; }
+  .mrow .st .min { display: block; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mrow.next .st { color: var(--awake-text); }
+  .mrow.todo .st { color: var(--muted); font-weight: 500; }
+  .mrow.next .no { color: var(--awake-text); }
+  .minute-axis { display: grid; grid-template-columns: 2.5rem minmax(0, 1.15fr) minmax(0, 1fr) 7rem; gap: 24px; padding: 0 4px 10px; }
+  .minute-axis .axis { grid-column: 3; }
+
+  .extras { margin-top: 56px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); gap: 24px 64px; }
+  .extras h3 { font-size: var(--s-18); }
+  .extras .note { color: var(--muted); font-size: var(--s-15); margin-top: 6px; max-width: 28ch; }
+  .xlist { list-style: none; margin: 0; padding: 0; }
+  .xrow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 4px 24px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); text-decoration: none; }
+  .xlist li:last-child .xrow { border-bottom: 1px solid var(--line); }
+  .xrow:hover .xt { text-decoration: underline; }
+  .xt { font-weight: 600; }
+  .xd { color: var(--muted); font-size: var(--s-15); }
+  .xbar { display: flex; align-items: center; gap: 12px; font-size: var(--s-15); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .xbar i { display: block; height: 10px; background: var(--empty); border-radius: 2px; }
+
+  @media (max-width: 860px) {
+    .program-head { grid-template-columns: 1fr; }
+    .mrow { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 4px 12px; }
+    .mrow .mb { grid-column: 2 / -1; grid-row: 2; margin-top: 8px; }
+    .mrow .st { grid-column: 3; grid-row: 1; align-self: start; }
+    .minute-axis { grid-template-columns: 2rem minmax(0, 1fr); gap: 12px; }
+    .minute-axis .axis { grid-column: 2; }
+    .extras { grid-template-columns: 1fr; }
+    .xrow { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Cases ---------- */
+  .cases { display: grid; gap: 56px; }
+  .case { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 8px 16px; }
+  .case-id { display: flex; gap: 14px; align-items: center; grid-column: 1 / -1; margin-bottom: 10px; }
+  .case-id img { width: 56px; height: 56px; object-fit: cover; object-position: center 20%; border-radius: 4px; }
+  .case-id p { max-width: 60ch; }
+  .case-id .nm { font-weight: 600; font-size: var(--s-18); }
+  .case .nights { grid-column: 1 / -1; }
+  .case-sum { grid-column: 1 / -1; color: var(--muted); max-width: 64ch; margin-top: 6px; }
+
+  /* ---------- Lists (tools, sounds) ---------- */
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); gap: 24px 64px; }
+  .split .note { color: var(--muted); margin-top: 12px; max-width: 30ch; }
+  .list2 { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 48px; }
+  .list2 li { break-inside: avoid; padding: 14px 0; border-top: 1px solid var(--line); }
+  .list2 a { font-weight: 600; text-decoration: none; }
+  .list2 a:hover { text-decoration: underline; }
+  .list2 .where { display: block; color: var(--muted); font-size: var(--s-15); }
+  .list2 .t { font-weight: 400; color: var(--muted); }
+  @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .list2 { columns: 1; } }
+
+  /* ---------- About ---------- */
+  .about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 64px; }
+  .about p + p { margin-top: 14px; }
+  .doctor { border-left: 4px solid var(--awake); padding: 4px 0 4px 20px; }
+  .doctor h3 { font-size: var(--s-18); margin-bottom: 8px; }
+  .doctor ul { margin: 0; padding-left: 1.1em; }
+  .doctor li + li { margin-top: 4px; }
+  @media (max-width: 860px) { .about { grid-template-columns: 1fr; } }
+
+  /* ---------- Footer ---------- */
+  footer { margin-top: clamp(72px, 10vw, 128px); border-top: 1px solid var(--line); padding: 32px 0 48px; font-size: var(--s-15); color: var(--muted); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: space-between; }
+  footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
+
+  /* ---------- Module view ---------- */
+  .mod-top { padding-top: clamp(28px, 5vw, 56px); }
+  .crumb { font-size: var(--s-15); color: var(--muted); }
+  .strip { margin-top: 24px; }
+  .strip ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 3px; }
+  .strip li { min-width: 0; }
+  .strip a { display: block; text-decoration: none; color: var(--muted); font-size: var(--s-15); font-variant-numeric: tabular-nums; }
+  .strip a i { display: block; height: 10px; background: var(--empty); border-radius: 2px; margin-bottom: 6px; }
+  .strip .done i { background: var(--asleep); }
+  .strip .cur i { background: var(--awake); height: 10px; }
+  .strip .cur a { color: var(--ink); font-weight: 600; }
+  .strip .num-only { display: none; }
+  @media (max-width: 720px) { .strip .full { display: none; } .strip .num-only { display: inline; } }
+
+  .mod-title { margin-top: 36px; }
+  .mod-title .meta { margin-top: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mod-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 40px 64px; margin-top: 40px; align-items: start; }
+  .video {
+    position: relative; aspect-ratio: 16 / 9; background: var(--asleep); overflow: hidden; border-radius: 4px;
+  }
+  .video img { position: absolute; right: 0; top: 0; height: 100%; width: auto; max-width: none; }
+  .video::after { content: ""; position: absolute; inset: 0; background: var(--photo-tint); }
+  .video .vtitle { position: absolute; z-index: 1; left: 24px; top: 22px; color: #fff; font-weight: 600; font-size: var(--s-24); line-height: 1.2; letter-spacing: -.01em; max-width: 11ch; }
+  .video .play {
+    position: absolute; z-index: 1; left: 24px; bottom: 24px;
+    background: var(--page); color: var(--ink); border: 0;
+  }
+  .video .play svg { flex: none; }
+  .video .vnote { position: absolute; z-index: 1; left: 24px; bottom: 88px; color: #fff; font-size: var(--s-15); max-width: 24ch; }
+  @media (max-width: 520px) { .video .vtitle { font-size: var(--s-18); left: 16px; top: 14px; } .video .play { left: 16px; bottom: 16px; } .video .vnote { left: 16px; bottom: 76px; } }
+  .pull { font-size: var(--s-24); line-height: 1.35; font-weight: 500; letter-spacing: -.01em; margin: 0; }
+  .pull + .by { margin-top: 12px; color: var(--muted); font-size: var(--s-15); }
+  .prose p + p { margin-top: 14px; }
+  .prose h2 { margin-bottom: 16px; }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: grid; gap: 0; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+  .steps li::before { content: counter(s); font-size: var(--s-24); font-weight: 600; color: var(--muted); line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .steps b { font-weight: 600; }
+
+  .calc { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: clamp(20px, 4vw, 40px); }
+  .calc-form { display: flex; flex-wrap: wrap; gap: 20px 32px; margin-top: 24px; align-items: end; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-weight: 600; font-size: var(--s-15); }
+  .field .hint { font-size: var(--s-15); color: var(--muted); }
+  .inp {
+    font: inherit; font-size: var(--s-24); font-weight: 600; color: var(--ink); background: var(--page);
+    border: 1px solid var(--line); border-radius: 4px; min-height: 56px; padding: 0 12px; font-variant-numeric: tabular-nums;
+  }
+  [data-theme="dark"] .inp { border-color: #46506A; }
+  .stepper { display: flex; gap: 6px; }
+  .stepper .inp { width: 5.5ch; text-align: center; -moz-appearance: textfield; }
+  .stepper .inp::-webkit-inner-spin-button, .stepper .inp::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper button { width: 56px; min-height: 56px; font: inherit; font-size: var(--s-24); font-weight: 600; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+  [data-theme="dark"] .stepper button { border-color: #46506A; }
+  .calc-out { margin-top: 36px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 56px; align-items: end; }
+  .bedtime .lbl { font-size: var(--s-15); color: var(--muted); }
+  .bedtime .big { font-size: clamp(2.75rem, 6vw, var(--s-64)); font-weight: 600; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .calc-facts { display: grid; gap: 4px; padding-bottom: 6px; }
+  .calc-facts b { font-weight: 600; }
+  .calc-chart { margin-top: 32px; }
+  .calc-chart .key { margin-top: 16px; }
+  @media (max-width: 640px) { .calc-out { grid-template-columns: 1fr; } }
+
+  .warn { border-left: 6px solid var(--awake); background: color-mix(in srgb, var(--awake) 13%, var(--surface)); padding: 24px 28px; border-radius: 0 4px 4px 0; }
+  .warn h2 { font-size: var(--s-24); letter-spacing: -.01em; }
+  .warn p { margin-top: 10px; max-width: 60ch; }
+  .warn p strong { font-weight: 600; }
+
+  .mod-end { display: grid; gap: 32px; margin-top: 56px; padding-top: 32px; border-top: 1px solid var(--line); }
+  .done-btn[aria-pressed="true"] { background: transparent; color: var(--ink); border-color: var(--asleep); }
+  .pn { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pn a { text-decoration: none; display: grid; gap: 2px; padding: 16px 0; }
+  .pn a:hover .pt { text-decoration: underline; }
+  .pn .pk { font-size: var(--s-15); color: var(--muted); }
+  .pn .pt { font-weight: 600; font-size: var(--s-18); }
+  .pn .next { text-align: right; }
+  .aside { display: grid; gap: 28px; }
+  .aside .box h3 { font-size: var(--s-18); margin-bottom: 6px; }
+  .aside .box p { font-size: var(--s-15); color: var(--muted); }
+  .aside .box { padding-top: 16px; border-top: 2px solid var(--ink); }
+
+  .mod-block { margin-top: 64px; }
+  @media (max-width: 900px) { .mod-grid { grid-template-columns: 1fr; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  }
+  /* Removed after review: .mrow.next background tint. Amber is reserved for the bars. */
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#/" aria-label="SleepEazzzy, home">
+      <svg width="26" height="18" viewBox="0 0 26 18" aria-hidden="true">
+        <rect x="0" y="2" width="26" height="5" rx="1" fill="var(--awake)"/>
+        <rect x="8" y="2" width="14" height="5" fill="var(--asleep)"/>
+        <rect x="0" y="11" width="26" height="5" rx="1" fill="var(--asleep)"/>
+      </svg>
+      SleepEazzzy
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#/" data-nav="home">Home</a>
+      <a href="#/program" data-nav="program">Program</a>
+      <a href="#/tools" data-nav="tools">Tools</a>
+      <a href="#/sounds" data-nav="sounds">Sounds</a>
+      <a href="#/about" data-nav="about">About</a>
+    </nav>
+    <div class="tools-bar">
+      <label class="sr" for="lang">Language</label>
+      <select id="lang" class="select">
+        <option lang="en" value="en" selected>English</option>
+        <option lang="es" value="es">Español</option>
+        <option lang="fa" value="fa" dir="rtl">فارسی</option>
+        <option lang="hi" value="hi">हिन्दी</option>
+        <option lang="ko" value="ko">한국어</option>
+        <option lang="vi" value="vi">Tiếng Việt</option>
+        <option lang="zh-Hant" value="zh-Hant">繁體中文</option>
+        <option lang="zh-Hans" value="zh-Hans">简体中文</option>
+      </select>
+      <button type="button" class="theme-btn" id="themeBtn" aria-pressed="false" aria-label="Dark mode">
+        <span class="knob" aria-hidden="true"></span><span class="lbl" aria-hidden="true">Dark mode</span>
+      </button>
+      <a class="signin" href="#/">Sign in</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ======================= HOME ======================= -->
+<div id="view-home" data-view="home">
+  <div class="wrap">
+
+    <section class="hero" aria-labelledby="h-home">
+      <h1 id="h-home" tabindex="-1">Spend less time lying awake.</h1>
+      <p class="sub">SleepEazzzy is a free, video-guided course in <strong>CBT-I</strong>, the treatment sleep doctors recommend first for chronic insomnia. Seven short modules, no medication.</p>
+
+      <figure class="night-hero" id="heroNight" aria-labelledby="heroCap">
+        <div class="top">
+          <figcaption id="heroCap" class="who">Robert, 72, one night <span id="heroWhen">before the program</span></figcaption>
+          <div class="seg" role="group" aria-label="Show Robert's night">
+            <button type="button" data-state="before" aria-pressed="true">Before</button>
+            <button type="button" data-state="after" aria-pressed="false">After 4 weeks</button>
+          </div>
+        </div>
+        <div class="stage">
+          <span class="flag up start" data-flag="start"><span class="k">In bed</span> <span data-v></span></span>
+          <span class="flag up end" data-flag="end"><span class="k">Up</span> <span data-v></span></span>
+          <div class="track" role="img" aria-label="">
+            <div class="grid" aria-hidden="true"></div>
+          </div>
+          <span class="flag down" data-flag="sleep"><span data-v></span></span>
+        </div>
+        <div class="axis" data-axis></div>
+        <ul class="totals" aria-live="polite">
+          <li><span class="n num" data-total="bed"></span><span class="d">in bed</span></li>
+          <li><span class="n num sleep" data-total="sleep"></span><span class="d"><span class="sw sleep"></span>asleep</span></li>
+          <li><span class="n num awake" data-total="awake"></span><span class="d"><span class="sw bed"></span>lying awake</span></li>
+        </ul>
+      </figure>
+
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#/module/compression">Start module 1 <span class="t">(8 min)</span></a>
+        <a class="btn btn-quiet" href="#/program">See the 7 modules</a>
+      </div>
+      <p class="cta-note">No account needed. Your progress saves on this device.</p>
+    </section>
+
+    <section id="program" aria-labelledby="h-program">
+      <div class="program-head">
+        <div>
+          <h2 id="h-program">Seven modules, 69 minutes in all</h2>
+          <p class="lede">Do one a day or one a week. Most people notice their nights changing within 2 to 4 weeks.</p>
+        </div>
+        <figure class="wendy" style="margin:0">
+          <img src="../public/assets/wendy.png" alt="Wendy, your CBT-I guide" width="88" height="96">
+          <div>
+            <blockquote>“Insomnia can be treated without medication. I’ll walk you through it, one short module at a time.”</blockquote>
+            <figcaption class="by">Wendy, your guide in every video. She had insomnia herself.</figcaption>
+          </div>
+        </figure>
+      </div>
+
+      <div class="progress-line">
+        <p><strong style="font-weight:600">You’ve finished 2 of 7.</strong> <span class="muted">18 of 69 minutes watched.</span></p>
+        <a class="btn btn-primary" href="#/module/compression">Continue with module 3 <span class="t">(9 min)</span></a>
+      </div>
+
+      <div class="minute-axis" aria-hidden="true"><div class="axis" id="minAxis"></div></div>
+      <ol class="modules" id="modules"></ol>
+
+      <div class="extras">
+        <div>
+          <h3>Extra topics</h3>
+          <p class="note">Optional. Watch any of these whenever they apply to you.</p>
+        </div>
+        <ul class="xlist" id="extras"></ul>
+      </div>
+    </section>
+
+    <section id="stories" aria-labelledby="h-stories">
+      <div class="sec-head">
+        <h2 id="h-stories">Two people who used this program</h2>
+        <p class="muted measure">Each bar is one typical night. Amber is time in bed lying awake; blue is sleep.</p>
+      </div>
+      <div class="cases" id="cases"></div>
+    </section>
+
+    <section id="tools" aria-labelledby="h-tools">
+      <div class="split">
+        <div>
+          <h2 id="h-tools">Tools</h2>
+          <p class="note">Each one sits inside the module that teaches it. Open them on their own any time.</p>
+        </div>
+        <ul class="list2">
+          <li><a href="#/module/compression">Sleep quiz</a><span class="where">Module 1</span></li>
+          <li><a href="#/module/compression">Thought journal</a><span class="where">Module 2</span></li>
+          <li><a href="#/module/compression">4-7-8 breathing timer</a><span class="where">Module 4</span></li>
+          <li><a href="#/module/compression">Progressive muscle relaxation</a><span class="where">Module 4, a guided walkthrough</span></li>
+          <li><a href="#/module/compression">Sleep schedule calculator</a><span class="where">Module 6</span></li>
+          <li><a href="#/module/compression">Bedtime routine builder</a><span class="where">Module 7</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="sounds" aria-labelledby="h-sounds">
+      <div class="split">
+        <div>
+          <h2 id="h-sounds">Sounds</h2>
+          <p class="note">For winding down. Set your phone face down and let one play.</p>
+        </div>
+        <ul class="list2">
+          <li><a href="#/sounds">Whispering woodland brook</a><span class="where">Nature sound</span></li>
+          <li><a href="#/sounds">Santorini midnight waves</a><span class="where">Nature sound</span></li>
+          <li><a href="#/sounds">Himalayan rainfall</a><span class="where">Nature sound</span></li>
+          <li><a href="#/sounds">Fireplace</a><span class="where">White noise</span></li>
+          <li><a href="#/sounds">REM Ember Delta Waves</a><span class="where">Ookean, <span class="t">10 min</span> of music</span></li>
+          <li><a href="#/sounds">Into Cryosleep</a><span class="where">Joseph Beg, <span class="t">10 min</span> of music</span></li>
+          <li><a href="#/sounds">Autumn Fields</a><span class="where">Chaxti, <span class="t">10 min</span> of music</span></li>
+          <li><a href="#/sounds">Soft landing</a><span class="where">Guided sleep meditation</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="about" aria-labelledby="h-about">
+      <div class="about">
+        <div>
+          <h2 id="h-about">Is this for you?</h2>
+          <div class="measure" style="margin-top:20px">
+            <p>It is if you have had trouble falling asleep, staying asleep, or waking too early for several weeks or longer.</p>
+            <p>CBT-I (cognitive behavioral therapy for insomnia) is what sleep medicine guidelines recommend first for chronic insomnia, before sleeping pills. This course teaches it in plain steps you can do at home.</p>
+          </div>
+        </div>
+        <div class="doctor">
+          <h3>See a doctor instead, or as well, if</h3>
+          <ul>
+            <li>your symptoms are severe</li>
+            <li>you get drowsy while driving</li>
+            <li>you think you might have sleep apnea or restless legs</li>
+          </ul>
+          <p class="small muted" style="margin-top:14px">SleepEazzzy is education, not personal medical care.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ======================= MODULE 6 ======================= -->
+<div id="view-module" data-view="module" hidden>
+  <div class="wrap">
+    <div class="mod-top">
+      <p class="crumb"><a href="#/program">All modules</a></p>
+      <nav class="strip" aria-label="Your progress through the 7 modules">
+        <ol id="strip"></ol>
+      </nav>
+
+      <div class="mod-title">
+        <h1 id="h-module" tabindex="-1">Sleep compression therapy</h1>
+        <p class="meta">Module 6 of 7, <span class="t">11 minutes</span></p>
+      </div>
+    </div>
+
+    <div class="mod-grid">
+      <div>
+        <div class="video">
+          <img src="../public/assets/wendy.png" alt="" width="323" height="351">
+          <p class="vtitle" aria-hidden="true">Sleep compression, with Wendy</p>
+          <p class="vnote" id="vnote" hidden>The video plays here on the real site.</p>
+          <button class="btn play" type="button" id="playBtn">
+            <svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M0 0 L14 8 L0 16 Z" fill="currentColor"/></svg>
+            Play the video <span class="t">(11 min)</span>
+          </button>
+        </div>
+      </div>
+      <div>
+        <p class="pull">“Going to bed later sounds backwards. It’s the most effective tool we have.”</p>
+        <p class="by">Wendy. When she had insomnia, she started with a 1:00 AM bedtime. Now she goes to bed at 11 to 11:30 PM.</p>
+      </div>
+    </div>
+
+    <div class="mod-grid">
+      <div class="prose measure">
+        <h2>The idea</h2>
+        <p>The longer you are awake, the more sleep pressure builds. Compression moves your bedtime later, so that when you lie down you have enough pressure to sleep straight through.</p>
+        <p>Your wake-up time stays fixed, every day. Within days to a few weeks your sleep consolidates into one solid block. Then you move bedtime earlier in small steps.</p>
+      </div>
+      <aside class="aside" aria-label="Pair with module 5">
+        <div class="box">
+          <h3>Pair it with stimulus control</h3>
+          <p>If you are in bed during your window and can’t sleep, get up and leave the room after 20 minutes. Come back when you feel sleepy. <a href="#/module/compression">Module 5</a> explains why.</p>
+        </div>
+      </aside>
+    </div>
+
+    <section class="mod-block" aria-labelledby="h-bob" style="padding-top:0">
+      <div class="sec-head">
+        <h2 id="h-bob">Bob’s schedule, night by night</h2>
+        <p class="muted measure">Bob was in bed from 9:00 PM to 6:30 AM, 9.5 hours, but asleep for only 5. He kept 6:30 AM as his wake time and moved bedtime to 1:00 AM: his 5 hours of sleep plus 30 minutes. The window narrows first, then widens as his sleep fills it.</p>
+      </div>
+      <div class="nights" id="bob"></div>
+      <ul class="key" style="margin-top:20px">
+        <li><span class="sw sleep"></span>asleep</li>
+        <li><span class="sw bed"></span>in bed, awake</li>
+      </ul>
+    </section>
+
+    <section class="mod-block" aria-labelledby="h-steps" style="padding-top:0">
+      <div class="mod-grid" style="margin-top:0">
+        <div>
+          <h2 id="h-steps" style="margin-bottom:20px">Set your own schedule in 5 steps</h2>
+          <ol class="steps">
+            <li><span><b>Pick your wake-up time.</b> One you can keep every day, weekends included.</span></li>
+            <li><span><b>Work out your average actual sleep.</b> Use a week of your sleep diary. Count 5 hours if it comes out lower.</span></li>
+            <li><span><b>Set your bedtime:</b> wake time minus your sleep, minus 30 minutes.</span></li>
+            <li><span><b>Hold that schedule</b> until you sleep through it most nights.</span></li>
+            <li><span><b>Move bedtime 30 minutes earlier</b> and repeat, until you sleep 6 to 7.5 hours. If your sleep gets shaky, step back for a few days.</span></li>
+          </ol>
+        </div>
+        <div class="warn" role="note" aria-labelledby="h-warn">
+          <h2 id="h-warn">You will feel sleepier than usual at first</h2>
+          <p>That means it’s working.</p>
+          <p><strong>Don’t drive when you feel drowsy.</strong> If sleepiness hits behind the wheel, pull over somewhere safe and rest.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mod-block" aria-labelledby="h-calc" style="padding-top:0">
+      <div class="calc">
+        <h2 id="h-calc">Work out your starting bedtime</h2>
+        <p class="muted measure" style="margin-top:8px">Your answers stay on this device.</p>
+        <form class="calc-form" id="calcForm" onsubmit="return false">
+          <div class="field">
+            <label for="wake">Wake-up time</label>
+            <input class="inp" type="time" id="wake" value="06:30" required>
+          </div>
+          <div class="field">
+            <label for="dur">Average hours actually asleep</label>
+            <div class="stepper">
+              <button type="button" id="durDown" aria-label="Half an hour less">−</button>
+              <input class="inp" type="number" id="dur" min="5" max="9" step="0.5" value="5" inputmode="decimal" aria-describedby="durHint">
+              <button type="button" id="durUp" aria-label="Half an hour more">+</button>
+            </div>
+            <span class="hint" id="durHint">5 to 9, in half hours</span>
+          </div>
+        </form>
+
+        <div class="calc-out" aria-live="polite">
+          <div class="bedtime">
+            <div class="lbl">Go to bed at</div>
+            <div class="big" id="outBed">1:00 AM</div>
+          </div>
+          <div class="calc-facts">
+            <p>Time in bed: <b class="t" id="outTib">5.5 hours</b>, until <span class="t" id="outWake">6:30 AM</span></p>
+            <p id="outNext"></p>
+          </div>
+        </div>
+
+        <div class="calc-chart nights" id="calcChart" aria-hidden="true"></div>
+        <ul class="key" style="margin-top:16px">
+          <li><span class="sw sleep"></span>your starting window</li>
+          <li><span class="sw ghost"></span>each later step, 30 minutes earlier</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="mod-end">
+      <div>
+        <button type="button" class="btn btn-primary done-btn" id="doneBtn" aria-pressed="false">Mark module 6 complete</button>
+      </div>
+      <nav class="pn" aria-label="Module">
+        <a href="#/module/compression" class="prev"><span class="pk">Previous: module 5</span><span class="pt">Stimulus control</span></a>
+        <a href="#/module/compression" class="next"><span class="pk">Next: module 7</span><span class="pt">Your sleep plan</span></a>
+      </nav>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 OWND LLC. Educational use only, not a substitute for medical advice.</p>
+    <nav aria-label="Legal">
+      <a href="#/">Privacy</a>
+      <a href="#/">Terms</a>
+      <a href="#/">Medical disclaimer</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var H = 60;
+  function t(h, m) { return h * H + (m || 0); }
+  function span(a, b) { return (b - a + 1440) % 1440; }
+  function fmt(m) {
+    m = ((m % 1440) + 1440) % 1440;
+    var h = Math.floor(m / 60), mm = m % 60;
+    var ap = h < 12 ? 'AM' : 'PM';
+    var h12 = h % 12 === 0 ? 12 : h % 12;
+    return h12 + ':' + (mm < 10 ? '0' : '') + mm + ' ' + ap;
+  }
+  function hrs(min) {
+    var h = min / 60;
+    var s = (Math.round(h * 100) / 100).toString();
+    return s;
+  }
+  function tickLabel(m) {
+    m = ((m % 1440) + 1440) % 1440;
+    if (m === 0) return 'Midnight';
+    if (m === 720) return 'Noon';
+    var h = Math.floor(m / 60);
+    return (h % 12 === 0 ? 12 : h % 12) + (h < 12 ? ' AM' : ' PM');
+  }
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+
+  /* ---------- Axis model: start minute + span ---------- */
+  function Axis(start, spanMin) {
+    this.start = start; this.span = spanMin;
+  }
+  Axis.prototype.pct = function (m) {
+    var d = ((m - this.start) % 1440 + 1440) % 1440;
+    if (d > this.span) d = d > (this.span + 1440) / 2 ? 0 : this.span;
+    return d / this.span * 100;
+  };
+  Axis.prototype.ticks = function (every) {
+    var out = [];
+    for (var d = 0; d <= this.span; d += every) out.push(this.start + d);
+    return out;
+  };
+  function drawAxis(node, axis, every) {
+    node.innerHTML = '';
+    axis.ticks(every).forEach(function (m, i, arr) {
+      var s = el('span');
+      s.textContent = tickLabel(m);
+      s.style.left = axis.pct(m) + '%';
+      if (axis.pct(m) === 100) s.style.left = '100%';
+      if (i % 2 === 1 && i !== arr.length - 1) s.className = 'odd';
+      node.appendChild(s);
+    });
+  }
+  function drawGrid(node, axis, every) {
+    node.innerHTML = '';
+    axis.ticks(every).forEach(function (m) {
+      var i = el('i'); i.style.left = axis.pct(m) + '%'; node.appendChild(i);
+    });
+  }
+  function place(bar, axis, a, b) {
+    var l = axis.pct(a);
+    var w = span(a, b) / axis.span * 100;
+    bar.style.left = l + '%';
+    bar.style.width = Math.max(0, Math.min(w, 100 - l)) + '%';
+  }
+
+  var NIGHT = new Axis(t(18), 18 * H);   /* 6 PM to noon */
+
+  /* ---------- Night track (bed bar + asleep segments) ---------- */
+  function NightTrack(track, axis, maxSegs) {
+    this.axis = axis;
+    this.bed = el('div', 'bar bed');
+    track.appendChild(this.bed);
+    this.segs = [];
+    for (var i = 0; i < maxSegs; i++) {
+      var s = el('div', 'bar sleep'); track.appendChild(s); this.segs.push(s);
+    }
+  }
+  NightTrack.prototype.set = function (n) {
+    var ax = this.axis;
+    place(this.bed, ax, n.bed[0], n.bed[1]);
+    var last = n.sleep[n.sleep.length - 1];
+    this.segs.forEach(function (s, i) {
+      var seg = n.sleep[i];
+      if (seg) place(s, ax, seg[0], seg[1]);
+      else { s.style.left = ax.pct(last[1]) + '%'; s.style.width = '0%'; }
+    });
+  };
+  function totals(n) {
+    var bed = span(n.bed[0], n.bed[1]);
+    var sl = n.sleep.reduce(function (a, s) { return a + span(s[0], s[1]); }, 0);
+    return { bed: bed, sleep: sl, awake: bed - sl };
+  }
+  function hm(min) {
+    var h = Math.floor(min / 60), m = min % 60;
+    if (!h) return m + 'm';
+    if (!m) return h + 'h';
+    return h + 'h ' + m + 'm';
+  }
+
+  /* ---------- Data ---------- */
+  var ROBERT = {
+    before: { bed: [t(21), t(6)], sleep: [[t(1), t(4)]] },
+    after:  { bed: [t(22, 30), t(6, 30)], sleep: [[t(22, 45), t(6, 15)]] }
+  };
+  var SARAH = {
+    before: { bed: [t(22), t(6, 30)], sleep: [[t(0, 30), t(1, 30)], [t(4), t(4, 45)]] },
+    after:  { bed: [t(22, 45), t(6, 45)], sleep: [[t(23), t(6, 30)]] }
+  };
+  var BOB = [
+    { k: 'Before', when: '9:00 PM', n: { bed: [t(21), t(6, 30)], sleep: [[t(23, 30), t(2, 30)], [t(3, 15), t(5, 15)]] } },
+    { k: 'First nights', when: '1:00 AM', n: { bed: [t(1), t(6, 30)], sleep: [[t(1, 15), t(6, 15)]] } },
+    { k: 'A few nights on', when: '12:30 AM', n: { bed: [t(0, 30), t(6, 30)], sleep: [[t(0, 45), t(6, 15)]] } },
+    { k: 'Next step', when: '12:00 AM', n: { bed: [t(0), t(6, 30)], sleep: [[t(0, 15), t(6, 15)]] } },
+    { k: 'About 2 weeks in', when: '11:00 PM', n: { bed: [t(23), t(6, 30)], sleep: [[t(23, 15), t(6, 15)]] } }
+  ];
+  var MODULES = [
+    { t: 'Welcome and the sleep quiz', s: 'Welcome', d: 'Meet Wendy, learn what insomnia is, and test what you already know.', m: 8, st: 'done' },
+    { t: 'Cognitive therapy', s: 'Thoughts', d: 'Reframe the thoughts that keep insomnia going. Includes a thought journal.', m: 10, st: 'done' },
+    { t: 'Sleep hygiene', s: 'Hygiene', d: 'The habits that make sleep easier, and the ones that work against it.', m: 9, st: 'next' },
+    { t: 'Relaxation techniques', s: 'Relaxation', d: '4-7-8 breathing, muscle relaxation, guided imagery and journaling.', m: 14, st: 'todo' },
+    { t: 'Stimulus control', s: 'Stimulus control', d: 'What to do when you can’t sleep: a 5-step rule that links bed with sleep again.', m: 8, st: 'todo' },
+    { t: 'Sleep compression therapy', s: 'Compression', d: 'Build sleep pressure with a schedule made for you. Includes a calculator.', m: 11, st: 'todo' },
+    { t: 'Your sleep plan', s: 'Your plan', d: 'Put it all together into a bedtime routine you can keep.', m: 9, st: 'todo' }
+  ];
+  var EXTRAS = [
+    { t: 'Sleep medications', d: 'How they fit alongside CBT-I. Never stop suddenly; taper with your doctor.', m: 6 },
+    { t: 'Sleep positions', d: 'Reduce strain so pain doesn’t wake you.', m: 5 },
+    { t: 'Other sleep disorders', d: 'Signs of sleep apnea, restless legs, circadian rhythm disorders and narcolepsy.', m: 7 }
+  ];
+  var TOTAL = MODULES.reduce(function (a, m) { return a + m.m; }, 0); /* 69 */
+  var STATUS = { done: 'Done', next: 'Up next', todo: 'Not started' };
+
+  /* ---------- Hero ---------- */
+  (function hero() {
+    var fig = document.getElementById('heroNight');
+    var track = fig.querySelector('.track');
+    drawAxis(fig.querySelector('[data-axis]'), NIGHT, 180);
+    drawGrid(track.querySelector('.grid'), NIGHT, 180);
+    var nt = new NightTrack(track, NIGHT, 1);
+    var fStart = fig.querySelector('[data-flag="start"]');
+    var fEnd = fig.querySelector('[data-flag="end"]');
+    var fSleep = fig.querySelector('[data-flag="sleep"]');
+    var btns = fig.querySelectorAll('.seg button');
+    function show(key) {
+      var n = ROBERT[key], tot = totals(n);
+      nt.set(n);
+      fStart.style.left = NIGHT.pct(n.bed[0]) + '%';
+      fStart.querySelector('[data-v]').textContent = fmt(n.bed[0]);
+      fEnd.style.left = NIGHT.pct(n.bed[1]) + '%';
+      fEnd.querySelector('[data-v]').textContent = fmt(n.bed[1]);
+      var s = n.sleep[0];
+      fSleep.style.left = (NIGHT.pct(s[0]) + span(s[0], s[1]) / NIGHT.span * 50) + '%';
+      fSleep.querySelector('[data-v]').textContent = 'Asleep ' + fmt(s[0]) + ' to ' + fmt(s[1]);
+      fig.querySelector('[data-total="bed"]').textContent = hm(tot.bed);
+      fig.querySelector('[data-total="sleep"]').textContent = hm(tot.sleep);
+      fig.querySelector('[data-total="awake"]').textContent = hm(tot.awake);
+      document.getElementById('heroWhen').textContent = key === 'before' ? 'before the program' : 'after 4 weeks';
+      track.setAttribute('aria-label', 'In bed ' + fmt(n.bed[0]) + ' to ' + fmt(n.bed[1]) + ', asleep ' + fmt(s[0]) + ' to ' + fmt(s[1]) + '.');
+      btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.state === key)); });
+    }
+    btns.forEach(function (b) { b.addEventListener('click', function () { show(b.dataset.state); }); });
+    show('before');
+  })();
+
+  /* ---------- Program list ---------- */
+  (function program() {
+    var ax = document.getElementById('minAxis');
+    [0, 15, 30, 45, 60, TOTAL].forEach(function (m, i, arr) {
+      var s = el('span');
+      s.textContent = i === 0 ? '0 min' : (i === arr.length - 1 ? TOTAL + ' min' : m);
+      s.style.left = (m / TOTAL * 100) + '%';
+      if (i === arr.length - 2) s.style.visibility = 'hidden'; /* 60 crowds 69 */
+      ax.appendChild(s);
+    });
+    var ol = document.getElementById('modules');
+    var at = 0;
+    MODULES.forEach(function (m, i) {
+      var li = el('li');
+      var a = el('a', 'mrow ' + m.st);
+      a.href = '#/module/compression';
+      a.innerHTML =
+        '<span class="no">' + (i + 1) + '</span>' +
+        '<span><span class="mt">' + m.t + '</span><span class="md" style="display:block">' + m.d + '</span></span>' +
+        '<span class="mb" aria-hidden="true"><span class="rail"></span><span class="b" style="left:' + (at / TOTAL * 100) + '%;width:' + (m.m / TOTAL * 100) + '%"></span></span>' +
+        '<span class="st">' + STATUS[m.st] + '<span class="min">' + m.m + ' min</span></span>';
+      at += m.m;
+      li.appendChild(a); ol.appendChild(li);
+    });
+    var ul = document.getElementById('extras');
+    EXTRAS.forEach(function (x) {
+      var li = el('li');
+      var a = el('a', 'xrow');
+      a.href = '#/module/compression';
+      a.innerHTML = '<span><span class="xt">' + x.t + '</span><span class="xd" style="display:block">' + x.d + '</span></span>' +
+        '<span class="xbar"><i aria-hidden="true" style="width:' + (x.m / 14 * 60) + '%"></i><span>' + x.m + ' min</span></span>';
+      li.appendChild(a); ul.appendChild(li);
+    });
+  })();
+
+  /* ---------- Row-of-nights helper ---------- */
+  function axisRow(container, axis, every) {
+    var r = el('div', 'nrow axis-row');
+    r.setAttribute('aria-hidden', 'true');
+    r.appendChild(el('span'));
+    var a = el('div', 'axis'); r.appendChild(a);
+    r.appendChild(el('span'));
+    drawAxis(a, axis, every);
+    container.appendChild(r);
+    return a;
+  }
+  function nightRow(container, axis, labHtml, valHtml, n, every) {
+    var r = el('div', 'nrow');
+    var lab = el('span', 'lab', labHtml);
+    var tr = el('div', 'track');
+    var g = el('div', 'grid'); g.setAttribute('aria-hidden', 'true'); tr.appendChild(g);
+    drawGrid(g, axis, every || 180);
+    var val = el('span', 'val', valHtml);
+    r.appendChild(lab); r.appendChild(tr); r.appendChild(val);
+    container.appendChild(r);
+    if (n) {
+      var nt = new NightTrack(tr, axis, n.sleep.length);
+      nt.set(n);
+      tr.setAttribute('role', 'img');
+      tr.setAttribute('aria-label', 'In bed ' + fmt(n.bed[0]) + ' to ' + fmt(n.bed[1]) + ', asleep ' + hm(totals(n).sleep) + '.');
+    }
+    return tr;
+  }
+
+  /* ---------- Cases ---------- */
+  (function cases() {
+    var root = document.getElementById('cases');
+    [
+      { nm: 'Robert, 72', img: '../public/assets/robert.jpg', line: '20 years of insomnia. In bed at 9 PM, awake for hours, asleep around 1 AM, awake again at 4.', d: ROBERT,
+        sum: 'After 4 weeks he goes to bed later, at 10:30 PM, and sleeps about 7.5 hours.' },
+      { nm: 'Sarah, 35', img: '../public/assets/sarah.jpg', line: 'Hasn’t slept well since her first child was born. Most nights she slept 1 to 2 hours, in pieces.', d: SARAH,
+        sum: 'After 4 weeks she sleeps about 7.5 hours in one stretch.' }
+    ].forEach(function (c) {
+      var art = el('article', 'case');
+      art.innerHTML = '<div class="case-id"><img src="' + c.img + '" alt="" width="56" height="56"><div><p class="nm">' + c.nm + '</p><p class="muted small">' + c.line + '</p></div></div>';
+      var nights = el('div', 'nights');
+      axisRow(nights, NIGHT, 180);
+      ['before', 'after'].forEach(function (k) {
+        var tt = totals(c.d[k]);
+        nightRow(nights, NIGHT,
+          '<b>' + (k === 'before' ? 'Before' : 'After 4 weeks') + '</b>',
+          '<b>' + hm(tt.sleep) + '</b> asleep', c.d[k]);
+      });
+      art.appendChild(nights);
+      art.appendChild(el('p', 'case-sum', c.sum));
+      root.appendChild(art);
+    });
+  })();
+
+  /* ---------- Bob ---------- */
+  (function bob() {
+    var root = document.getElementById('bob');
+    axisRow(root, NIGHT, 180);
+    BOB.forEach(function (b) {
+      var tt = totals(b.n);
+      nightRow(root, NIGHT, '<b>' + b.k + '</b><span class="t">Bed ' + b.when + '</span>',
+        '<b>' + hrs(tt.sleep) + '</b> of ' + hrs(tt.bed) + ' h asleep', b.n);
+    });
+  })();
+
+  /* ---------- Progress strip (module view) ---------- */
+  var strip = document.getElementById('strip');
+  function drawStrip(sixDone) {
+    strip.innerHTML = '';
+    MODULES.forEach(function (m, i) {
+      var st = i < 2 || (i === 5 && sixDone) ? 'done' : (i === 5 ? 'cur' : '');
+      var li = el('li', st);
+      li.style.flex = m.m + ' 1 0';
+      var a = el('a');
+      a.href = '#/module/compression';
+      if (i === 5) a.setAttribute('aria-current', 'page');
+      a.innerHTML = '<i aria-hidden="true"></i><span class="num-only">' + (i + 1) + '</span><span class="full">' + (i + 1) + ' ' + m.s + '</span>' +
+        '<span class="sr">, ' + (st === 'done' ? 'done' : st === 'cur' ? 'you are here' : 'not started') + '</span>';
+      li.appendChild(a); strip.appendChild(li);
+    });
+  }
+  drawStrip(false);
+  var doneBtn = document.getElementById('doneBtn');
+  doneBtn.addEventListener('click', function () {
+    var on = doneBtn.getAttribute('aria-pressed') !== 'true';
+    doneBtn.setAttribute('aria-pressed', String(on));
+    doneBtn.textContent = on ? 'Module 6 marked complete' : 'Mark module 6 complete';
+    drawStrip(on);
+  });
+  document.getElementById('playBtn').addEventListener('click', function () {
+    document.getElementById('vnote').hidden = false;
+  });
+
+  /* ---------- Calculator ---------- */
+  (function calc() {
+    var wake = document.getElementById('wake');
+    var dur = document.getElementById('dur');
+    var chart = document.getElementById('calcChart');
+    try {
+      var sw = localStorage.getItem('se_calc_wake');
+      var sd = localStorage.getItem('se_calc_dur');
+      if (sw && /^\d\d:\d\d$/.test(sw)) wake.value = sw;
+      if (sd && !isNaN(parseFloat(sd))) dur.value = sd;
+    } catch (e) {}
+
+    function clampDur(v) {
+      v = parseFloat(v);
+      if (isNaN(v)) v = 5;
+      v = Math.round(v * 2) / 2;
+      return Math.min(9, Math.max(5, v));
+    }
+    function hoursText(h) { return (h % 1 ? h.toFixed(1) : String(h)) + ' hours'; }
+
+    function update(fromBlur) {
+      var parts = (wake.value || '06:30').split(':');
+      var wm = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      if (isNaN(wm)) wm = 390;
+      var raw = parseFloat(dur.value);
+      var d = clampDur(dur.value);
+      if (fromBlur || isNaN(raw) || raw !== d) { if (fromBlur || (!isNaN(raw) && (raw < 5 || raw > 9))) dur.value = d; }
+      var tib = d + 0.5;
+      var bed = ((wm - tib * 60) % 1440 + 1440) % 1440;
+      var goalTib = 8;                             /* 7.5 h sleep + 30 min */
+      var goalBed = ((wm - goalTib * 60) % 1440 + 1440) % 1440;
+
+      document.getElementById('outBed').textContent = fmt(bed);
+      document.getElementById('outTib').textContent = hoursText(tib);
+      document.getElementById('outWake').textContent = fmt(wm);
+      var next = document.getElementById('outNext');
+      if (d >= 7.5) {
+        next.innerHTML = 'You already sleep 7.5 hours or more. Keep this schedule; there’s no need to move bedtime earlier.';
+      } else {
+        var steps = Math.round((goalTib - tib) * 2);
+        next.innerHTML = 'Once you sleep through most nights, go to bed at <b class="t">' + fmt(bed - 30) + '</b>. ' +
+          'Keep stepping 30 minutes earlier, ' + steps + (steps === 1 ? ' step' : ' steps') + ' in all, until you reach <b class="t">' + fmt(goalBed) + '</b> and 7.5 hours of sleep.';
+      }
+      try { localStorage.setItem('se_calc_wake', wake.value); localStorage.setItem('se_calc_dur', String(d)); } catch (e) {}
+
+      /* Axis: 6 PM to noon when the window fits, otherwise an 18-hour axis that does */
+      var earliest = d >= 7.5 ? bed : goalBed;
+      var ax = NIGHT;
+      var fits = span(t(18), wm) <= 18 * 60 && span(t(18), earliest) <= span(t(18), wm);
+      if (!fits) {
+        var st = Math.floor((earliest - 120) / 180) * 180;
+        ax = new Axis(((st % 1440) + 1440) % 1440, 18 * 60);
+      }
+      chart.innerHTML = '';
+      axisRow(chart, ax, 180);
+      var r1 = nightRow(chart, ax, '<b>Start</b><span class="t">' + fmt(bed) + '</span>', '<b class="t">' + hrs(tib * 60) + '</b> h in bed', null);
+      var b1 = el('div', 'bar sleep'); r1.appendChild(b1); place(b1, ax, bed, wm);
+      if (d < 7.5) {
+        var r2 = nightRow(chart, ax, '<b>Goal</b><span class="t">' + fmt(goalBed) + '</span>', '<b class="t">8</b> h in bed', null);
+        for (var i = 1; i * 30 <= (goalTib - tib) * 60; i++) {
+          var g = el('div', 'bar ghost'); r2.appendChild(g); place(g, ax, bed - i * 30, bed - (i - 1) * 30);
+        }
+        var f = el('div', 'bar sleep'); r2.appendChild(f); place(f, ax, bed, wm);
+      }
+    }
+    wake.addEventListener('input', function () { update(false); });
+    dur.addEventListener('input', function () { update(false); });
+    dur.addEventListener('change', function () { update(true); });
+    document.getElementById('durDown').addEventListener('click', function () { dur.value = clampDur(dur.value) - 0.5 < 5 ? 5 : clampDur(dur.value) - 0.5; update(true); });
+    document.getElementById('durUp').addEventListener('click', function () { dur.value = clampDur(dur.value) + 0.5 > 9 ? 9 : clampDur(dur.value) + 0.5; update(true); });
+    update(true);
+  })();
+
+  /* ---------- Theme ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeBtn');
+  function syncTheme() {
+    var dark = root.getAttribute('data-theme') === 'dark';
+    themeBtn.setAttribute('aria-pressed', String(dark));
+  }
+  themeBtn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('se_theme', next); } catch (e) {}
+    syncTheme();
+  });
+  syncTheme();
+
+  /* ---------- Routing ---------- */
+  var views = { home: document.getElementById('view-home'), module: document.getElementById('view-module') };
+  var sections = ['program', 'tools', 'sounds', 'about'];
+  var firstRoute = true;
+  function route() {
+    var h = location.hash || '#/';
+    var path = h.replace(/^#/, '');
+    var isModule = path.indexOf('/module/') === 0;
+    views.home.hidden = isModule;
+    views.module.hidden = !isModule;
+    var navKey = isModule ? 'program' : 'home';
+    var sec = path.replace(/^\//, '');
+    if (!isModule && sections.indexOf(sec) > -1) navKey = sec;
+    document.querySelectorAll('[data-nav]').forEach(function (a) {
+      if (a.dataset.nav === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    document.title = isModule ? 'Module 6: Sleep compression therapy | SleepEazzzy' : 'SleepEazzzy: a free CBT-I program for insomnia';
+    if (isModule) {
+      window.scrollTo(0, 0);
+      if (!firstRoute) document.getElementById('h-module').focus({ preventScroll: true });
+    } else if (sections.indexOf(sec) > -1) {
+      var target = document.getElementById(sec);
+      target.scrollIntoView();
+      var hd = target.querySelector('h2');
+      if (hd && !firstRoute) { hd.setAttribute('tabindex', '-1'); hd.focus({ preventScroll: true }); }
+    } else {
+      window.scrollTo(0, 0);
+      if (!firstRoute) document.getElementById('h-home').focus({ preventScroll: true });
+    }
+    firstRoute = false;
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>

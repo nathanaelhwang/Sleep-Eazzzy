@@ -3,13 +3,8 @@
 import type { Module } from '@/lib/data';
 import { Callout } from '../Callout';
 import { HostCard } from '../HostCard';
-import { MarkComplete } from '../MarkComplete';
-import { ModuleDisclaimer } from '../ModuleDisclaimer';
-import { ModuleHero } from '../ModuleHero';
-import { ModuleNav } from '../ModuleNav';
-import { PullQuote } from '../PullQuote';
 import { useDict, useModContent, useT } from '../LangProvider';
-import { VideoPlayer } from '../VideoPlayer';
+import { Article, ModuleShell, type ModuleItem } from './Shell';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Content = Record<string, any>;
@@ -19,53 +14,51 @@ export function HygieneModule({ mod }: { mod: Module }) {
   const c = useModContent(3) as Content;
   const hyg = useDict().hygiene;
 
-  return (
-    <>
-      <ModuleHero mod={mod} />
-      <div className="container container-narrow mod-body">
-        <ModuleDisclaimer />
-        <VideoPlayer title={`${t('module_label')} ${mod.num}: ${mod.title}`} time={mod.duration} videoId={mod.videoId} />
-        <HostCard quote={c.hostQuote} />
-
-        <div className="do-dont" style={{ marginTop: 24 }}>
-          <div className="do-col">
-            <h4>{hyg.do_label}</h4>
-            <ul>
-              {hyg.dos.map((d, i) => (
-                <li key={i}>
-                  <span className="ic">✓</span>
-                  <span>{d}</span>
-                </li>
-              ))}
-            </ul>
+  const items: ModuleItem[] = [
+    {
+      id: 'habits',
+      kind: 'article',
+      // Do and Don't sit side by side as a comparison, so this one needs a wider sheet.
+      wide: true,
+      title: t('mod_hyg_h'),
+      content: (
+        <Article title={t('mod_hyg_h')}>
+          <HostCard quote={c.hostQuote} />
+          <div className="dd">
+            <div>
+              <h3 className="dd-do">{hyg.do_label}</h3>
+              <ul className="rows">
+                {hyg.dos.map((d, i) => (
+                  <li key={i}>{d}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="dd-dont">{hyg.dont_label}</h3>
+              <ul className="rows">
+                {hyg.donts.map((d, i) => (
+                  <li key={i}>{d}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="dont-col">
-            <h4>{hyg.dont_label}</h4>
-            <ul>
-              {hyg.donts.map((d, i) => (
-                <li key={i}>
-                  <span className="ic">✕</span>
-                  <span>{d}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="lesson-block" style={{ marginTop: 24 }}>
-          <h4>{c.blue_h}</h4>
-          <p>{c.blue_p1}</p>
-          <p>{c.blue_p2}</p>
+        </Article>
+      ),
+    },
+    {
+      id: 'blue-light',
+      kind: 'article',
+      title: c.blue_h,
+      content: (
+        <Article title={c.blue_h}>
+          <p>{t('mod_blue_ios')}</p>
+          <p>{t('mod_blue_android')}</p>
           <p>{c.blue_p3}</p>
-        </div>
+          <Callout label={c.rule_label}>{c.rule}</Callout>
+        </Article>
+      ),
+    },
+  ];
 
-        <PullQuote>{c.pull}</PullQuote>
-
-        <Callout label={c.rule_label}>{c.rule}</Callout>
-
-        <MarkComplete moduleId={mod.id} />
-        <ModuleNav current={mod.id} />
-      </div>
-    </>
-  );
+  return <ModuleShell mod={mod} items={items} />;
 }

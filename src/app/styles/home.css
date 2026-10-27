@@ -1,0 +1,154 @@
+/* home styles. Builds on tokens and primitives in base.css.
+   Home sections are scoped under .home; the program list (also on /modules)
+   under .program-list. */
+
+/* ---------- Hero: Robert's night, before and after ---------- */
+.home .hero { padding-top: clamp(40px, 7vw, 88px); }
+.home .hero h1 { max-width: 12ch; }
+.home .hero .sub { margin-top: 20px; font-size: clamp(1.125rem, 1.6vw, 1.3125rem); max-width: 46ch; color: var(--muted); }
+.home .hero .sub b { color: var(--ink); font-weight: 600; }
+
+.night-hero { margin: 48px 0 0; }
+.night-hero .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-bottom: 28px; }
+.night-hero .who { font-weight: 600; }
+.night-hero .stage { position: relative; padding: 34px 0 48px; }
+.night-hero .stage .track { height: 56px; }
+.night-hero .stage .track .grid { inset: -34px 0 -52px; }
+
+/* Flags are physical (left/right): the stage is always dir="ltr". */
+.night-hero .flag {
+  position: absolute; font-size: var(--s-15); white-space: nowrap; line-height: 1.2;
+  font-variant-numeric: tabular-nums; transition: left 0.9s var(--ease), opacity 0.3s;
+}
+.night-hero .flag.up { top: 0; }
+.night-hero .flag.up.end { transform: translateX(-100%); text-align: right; }
+.night-hero .flag.up::after { content: ''; position: absolute; top: 100%; left: 0; width: 2px; height: 14px; background: var(--awake); }
+.night-hero .flag.up.end::after { left: auto; right: 0; }
+.night-hero .flag.down { bottom: 0; transform: translateX(-50%); color: var(--ink); font-weight: 600; }
+.night-hero .flag .k { color: var(--muted); font-weight: 400; }
+
+.night-hero .totals { display: flex; flex-wrap: wrap; gap: 12px 48px; margin: 32px 0 0; padding: 0; list-style: none; }
+.night-hero .totals li { display: grid; gap: 2px; }
+.night-hero .totals .n { font-family: var(--font-head); font-stretch: var(--head-stretch); font-size: var(--s-36); font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.night-hero .totals .n.sleep { color: var(--asleep); }
+.night-hero .totals .n.awake { color: var(--awake-text); }
+.night-hero .totals .d { font-size: var(--s-15); color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+
+.home .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 44px; }
+.home .cta-note { margin-top: 14px; font-size: var(--s-15); color: var(--muted); }
+
+@media (max-width: 640px) {
+  .night-hero .flag.down { display: none; }
+  .night-hero .flag.up.end { top: auto; bottom: 10px; }
+  .night-hero .flag.up.end::after { top: auto; bottom: 100%; }
+  .night-hero .stage { padding-bottom: 44px; }
+  .night-hero .stage .track { height: 44px; }
+  .night-hero .stage .track .grid { inset: -34px 0 -44px; }
+  .night-hero .totals { gap: 12px 28px; }
+  .night-hero .totals .n { font-size: 1.75rem; }
+  .home .cta-row .btn { width: 100%; }
+}
+
+/* ---------- Program head: heading and lede, with the start/continue button at the end ---------- */
+.home .program-head {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px 64px; align-items: end; margin-bottom: 40px;
+}
+.home .program-head .lede { margin-top: 14px; color: var(--muted); max-width: 44ch; }
+.home .progress-line { margin-bottom: 20px; }
+.home .progress-line strong { font-weight: 600; }
+@media (max-width: 860px) {
+  .home .program-head { grid-template-columns: 1fr; }
+}
+
+/* ---------- Program list: module rows on one minute axis ---------- */
+.program-list .modules { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.program-list .modules li { border-bottom: 1px solid var(--line); }
+.program-list .mrow,
+.program-list .minute-axis {
+  display: grid; grid-template-columns: 2.5rem minmax(0, 1.15fr) minmax(0, 1fr) 7rem; column-gap: 24px;
+}
+.program-list .mrow { row-gap: 6px; align-items: center; padding: 20px 4px; text-decoration: none; color: inherit; }
+.program-list .mrow:hover .mt { text-decoration: underline; text-decoration-thickness: 1px; }
+.program-list .mrow .no {
+  font-size: var(--s-24); font-weight: 600; line-height: 1.25; color: var(--muted);
+  font-variant-numeric: tabular-nums; align-self: start;
+}
+.program-list .mrow .mt { display: block; font-family: var(--font-head); font-stretch: var(--head-stretch); font-size: 1.375rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; }
+.program-list .mrow .md { display: block; margin-top: 2px; font-size: var(--s-15); color: var(--muted); }
+.program-list .mrow .mb { position: relative; height: 14px; }
+.program-list .mrow .mb .rail { position: absolute; inset: 6px 0; background: var(--grid); }
+.program-list .mrow .mb .b { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: var(--empty); }
+.program-list .mrow.done .mb .b { background: var(--asleep); }
+.program-list .mrow.next .mb .b { background: var(--awake); }
+.program-list .mrow .st { font-size: var(--s-15); font-weight: 600; line-height: 1.3; text-align: end; }
+.program-list .mrow .st .min { display: block; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+.program-list .mrow.next .st,
+.program-list .mrow.next .no { color: var(--awake-text); }
+.program-list .mrow.todo .st { color: var(--muted); font-weight: 500; }
+.program-list .minute-axis { padding: 0 4px 10px; }
+.program-list .minute-axis .axis { grid-column: 3; }
+
+.program-list .extras {
+  margin-top: 56px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); gap: 24px 64px;
+}
+.program-list .extras-h { font-family: var(--font); font-stretch: normal; font-size: var(--s-18); font-weight: 600; line-height: 1.3; letter-spacing: 0; }
+.program-list .extras-note { margin-top: 6px; max-width: 28ch; font-size: var(--s-15); color: var(--muted); }
+.program-list .xlist { list-style: none; margin: 0; padding: 0; }
+.program-list .xrow {
+  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 4px 24px; align-items: center;
+  padding: 12px 0; border-top: 1px solid var(--line); text-decoration: none; color: inherit;
+}
+.program-list .xlist li:last-child .xrow { border-bottom: 1px solid var(--line); }
+.program-list .xrow:hover .xt { text-decoration: underline; }
+.program-list .xt { display: block; font-weight: 600; }
+.program-list .xd { display: block; font-size: var(--s-15); color: var(--muted); }
+.program-list .xbar { display: flex; align-items: center; gap: 12px; font-size: var(--s-15); color: var(--muted); }
+.program-list .xbar i { display: block; flex: none; height: 10px; background: var(--empty); border-radius: 2px; }
+.program-list .xrow.done .xbar i { background: var(--asleep); }
+.program-list .xbar .xst { margin-inline-start: auto; }
+.program-list .xrow.done .xst { color: var(--ink); font-weight: 600; }
+
+@media (max-width: 860px) {
+  .program-list .mrow { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 4px 12px; }
+  .program-list .mrow .mb { grid-column: 2 / -1; grid-row: 2; margin-top: 8px; }
+  .program-list .mrow .st { grid-column: 3; grid-row: 1; align-self: start; }
+  .program-list .minute-axis { grid-template-columns: 2rem minmax(0, 1fr); column-gap: 12px; }
+  .program-list .minute-axis .axis { grid-column: 2; }
+  .program-list .extras { grid-template-columns: 1fr; }
+  .program-list .xrow { grid-template-columns: 1fr; }
+}
+
+/* /modules: the list sits under the page title. */
+.modules-page { margin-top: clamp(40px, 6vw, 64px); }
+
+/* ---------- Stories: two people, before and after ---------- */
+.home .cases { display: grid; gap: 56px; }
+.home .case-id { display: flex; gap: 14px; align-items: center; margin-bottom: 20px; }
+.home .case-id img { flex: none; width: 56px; height: 56px; object-fit: cover; object-position: center 20%; border-radius: 4px; }
+.home .case-id p { max-width: 60ch; }
+.home .case-id .nm { font-family: var(--font); font-stretch: normal; font-size: var(--s-18); font-weight: 600; line-height: 1.3; letter-spacing: 0; }
+.home .case-sum { margin-top: 20px; color: var(--muted); max-width: 64ch; }
+
+/* ---------- Tools and sounds: two-column lists ---------- */
+.home .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); gap: 24px 64px; }
+.home .split-note { margin-top: 12px; max-width: 30ch; color: var(--muted); }
+.home .more { margin-top: 16px; font-size: var(--s-15); }
+.home .list2 { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 48px; }
+.home .list2 li { break-inside: avoid; padding: 14px 0; border-top: 1px solid var(--line); }
+.home .list2 a { font-weight: 600; text-decoration: none; }
+.home .list2 a:hover { text-decoration: underline; }
+.home .list2 .where { display: block; font-size: var(--s-15); color: var(--muted); }
+@media (max-width: 860px) { .home .split { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .home .list2 { columns: 1; } }
+
+/* ---------- About: who it's for, when to see a doctor ---------- */
+.home .about-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 64px; }
+.home .about-text { margin-top: 20px; }
+.home .about-text p + p { margin-top: 14px; }
+.home .doctor { border-inline-start: 4px solid var(--awake); padding: 4px 0; padding-inline-start: 20px; }
+.home .doctor h3 { font-family: var(--font); font-stretch: normal; font-size: var(--s-18); font-weight: 600; line-height: 1.3; letter-spacing: 0; margin-bottom: 8px; }
+.home .doctor ul { margin: 0; padding-inline-start: 1.1em; }
+.home .doctor li + li { margin-top: 4px; }
+.home .doctor .small { margin-top: 14px; }
+@media (max-width: 860px) { .home .about-grid { grid-template-columns: 1fr; } }

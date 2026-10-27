@@ -14,7 +14,7 @@ export async function generateMetadata({
   return buildPageMetadata({
     lang,
     path: '/about',
-    title: dict.t.about_title as string,
+    title: dict.t.about_h1 as string,
     description: dict.t.about_sub as string,
   });
 }
